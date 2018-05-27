@@ -3,31 +3,445 @@
 <head>
     <meta charset="UTF-8">
     <!-- import CSS -->
-    <link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
+    <link rel="stylesheet" href="css/theme-chalk.index.css">
 </head>
+<!-- import Vue before Element -->
+<script src="lib/vue.js"></script>
+<!-- import JavaScript -->
+<script src="lib/element-ui.2.3.9.index.js"></script>
+<script src=lib/nebPay.js></script>
+<script src=lib/nebulas.js></script>
 <body>
 <div id="app">
-    <el-button @click="visible = true">Button</el-button>
-    <el-dialog :visible.sync="visible" title="Hello world">
-        <p>Try Element</p>
-    </el-dialog>
+    <el-row :gutter="20">
+        <el-col :span="24">
+            <div class="grid-content bg-purple-dark">
+                <h1> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;区块链彩票</h1>
+            </div>
+        </el-col>
+    </el-row>
+    <el-row :gutter="20">
+        <el-col :span="16">
+            <div class="grid-content">
+                <template>
+                    <el-tabs v-model="activeName" @tab-click="handleClick">
+                        <el-tab-pane label="彩票投注" name="first">
+                            <div style="margin-left: 15px">
+                                <el-row :gutter="20">
+                                    <el-col :span="4">
+                                        <div>
+                                            请选择6个红球:
+                                        </div>
+                                    </el-col>
+                                    <el-col :span="20">
+                                        <div>
+                                            <el-checkbox-group v-model="red0" size="mini" :max="6"  fill="#FC4C00">
+                                                <el-checkbox-button v-for="item in red1"
+                                                                    :label="item"></el-checkbox-button>
+                                            </el-checkbox-group>
+                                        </div>
+                                        <div style="margin-top: 5px;">
+                                            <el-checkbox-group v-model="red0" size="mini" :max="6"  fill="#FC4C00">
+                                                <el-checkbox-button v-for="item in red2"
+                                                                    :label="item"></el-checkbox-button>
+                                            </el-checkbox-group>
+                                        </div>
+                                    </el-col>
+                                </el-row>
+
+                                <el-row :gutter="20">
+                                    <el-col :span="4">
+                                        <div style="margin-top: 20px;">
+                                            请选择1个篮球:
+                                        </div>
+                                    </el-col>
+                                    <el-col :span="20">
+                                        <div style="margin-top: 20px;">
+                                            <el-radio-group v-model="blue0" size="mini">
+                                                <el-radio-button v-for="item in blue1" :label="item"></el-radio-button>
+                                            </el-radio-group>
+                                        </div>
+                                    </el-col>
+                                </el-row>
+                            </div>
+                            <div style="margin-left: 10px;margin-top: 30px;">
+                                <el-row :gutter="20">
+                                    <el-col :span="4">
+                                        <div style="margin-top: 10px;">
+                                        </div>
+                                    </el-col>
+                                    <el-col :span="16">
+                                        <span style="color: red">当前彩期: {{currentIssue}}</span>
+                                        <hr>
+                                        <div v-for="lottery in ballList">
+                                            <el-col v-for="(lv,index) in lottery" :span="3">
+                                                <span v-if="index!=6" style="color:red;">{{lv}}</span>
+                                                <span v-if="index==6" style="color:blue;">{{lv}}</span>
+                                            </el-col>
+                                            </br>
+
+                                        </div>
+                                    </el-col>
+                                    <el-col :span="4">
+                                        <el-row style="margin-top: 30px;" :gutter="20">
+                                            <el-button icon="el-icon-plus" @click="addLottery" type="success" plain>
+                                                添加投注
+                                            </el-button>
+                                        </el-row>
+                                        <el-row style="margin-top: 10px;" :gutter="20">
+                                            <el-button icon="el-icon-circle-plus-outline" @click="randomLottery"
+                                                       type="info" plain>随机一注
+                                            </el-button>
+                                        </el-row>
+                                        <el-row style="margin-top: 10px;" :gutter="20">
+                                            <el-button icon="el-icon-delete" @click="clearLottery" type="danger" plain>
+                                                清空投注
+                                            </el-button>
+                                        </el-row>
+                                        <el-row style="margin-top: 10px;" :gutter="20">
+                                            <el-button icon="el-icon-upload2" @click="submitBlock" type="primary" plain>
+                                                提交到链
+                                            </el-button>
+                                        </el-row>
+                                    </el-col>
+
+                                </el-row>
+                            </div>
+
+                        </el-tab-pane>
+                        <el-tab-pane label="投注查询" name="second">
+                            <el-table
+                                    :data="lotteryList"
+                                    style="width: 100%;margin-left: 10px;margin-top: 10px">
+                                <el-table-column
+                                        prop="index"
+                                        label="索引"
+                                        width="100">
+                                </el-table-column>
+                                <el-table-column
+                                        prop="issue"
+                                        label="彩期"
+                                        width="150">
+                                </el-table-column>
+                                <el-table-column
+                                        prop="from"
+                                        min-width="200"
+                                        label="投注星云账户地址">
+                                </el-table-column>
+                                <el-table-column
+                                        prop="lottery"
+                                        min-width="200"
+                                        label="投注号码">
+                                    <template scope="scope">
+                                        <ul>
+                                            <li v-for="lotteryItem in scope.row.lottery">
+                                                <span style="color: red">{{lotteryItem.substring(0,lotteryItem.lastIndexOf(","))}}</span>
+                                                <span style="color: blue">  +{{lotteryItem.substring(lotteryItem.lastIndexOf(",")+1)}}</span>
+                                            </li>
+                                        </ul>
+
+
+                                    </template>
+                                </el-table-column>
+                                <el-table-column
+                                        prop="dateStr"
+                                        width="150"
+                                        label="提交时间">
+                                </el-table-column>
+                            </el-table>
+                            <el-pagination
+                                    @size-change="handleSizeChange"
+                                    @current-change="handleCurrentChange"
+                                    :current-page="currentPage"
+                                    :page-sizes="[5, 10, 20, 50]"
+                                    :page-size="pageSize"
+                                    style="margin-left: 20px"
+                                    layout="total, sizes, prev, pager, next, jumper"
+                                    :total="totalCount">
+                            </el-pagination>
+
+                        </el-tab-pane>
+                        <el-tab-pane label="中奖播报" name="third">
+                            暂未开放
+
+                        </el-tab-pane>
+                        <el-tab-pane label="规则说明" name="fourth">
+
+
+                        </el-tab-pane>
+                    </el-tabs>
+                </template>
+                </template>
+
+            </div>
+        </el-col>
+        <el-col :span="8">
+            <el-row :gutter="20">
+                <el-col :span="24">
+                    <div>
+                        <h4>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;双色球中奖规则</h4>
+                        <img src="img/rule.png">
+                    </div>
+                </el-col>
+            </el-row>
+        </el-col>
+
+    </el-row>
+
+
 </div>
 </body>
-<!-- import Vue before Element -->
-<script src="https://unpkg.com/vue/dist/vue.js"></script>
-<!-- import JavaScript -->
-<script src="https://unpkg.com/element-ui/lib/index.js"></script>
-<el-container>
-    <el-header>Header</el-header>
-    <el-main>Main</el-main>
-    <el-footer>Footer</el-footer>
-</el-container>
+
 <script>
+
+    var dappAddress = "n1p6bPcEneaHopvpG4nd8mVfRdYah6hFsCZ";
+    var intervalQuery;
+    var serialNumber;
+    var NebPay;    //https://github.com/nebulasio/nebPay
+    var nebPay;
+
     new Vue({
         el: '#app',
-        data: function() {
-            return { visible: false }
+        data: function () {
+            return {
+                activeName: 'first',
+                red1: [01, 02, 03, 04, 05, 06, 07, 08, 09, 10, 11, 12, 13, 14, 15, 16, 17],
+                red2: [18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33],
+                blue1: [01, 02, 03, 04, 05, 06, 07, 08, 09, 10, 11, 12, 13, 14, 15, 16],
+                blue0: Math.ceil(Math.random() * 15),
+                red0: this.getRandomLottery(),
+                ballList: [],
+                lotteryList: [],
+                currentIssue:this.calIssue(),
+                currentPage:1,
+                totalCount:0,
+                pageSize:5
+            };
+        },
+        methods: {
+            addLottery() {
+                if (this.ballList.length>5)
+                {
+                    this.$message({
+                        type: 'error',
+                        showClose: true,
+                        message: '试运行阶段最多只能投5注,请清空重新投注',
+                    });
+                    return;
+                }
+                let lottery = [];
+                if(this.red0.length!=6)
+                {
+                    this.$message({
+                        type: 'warning',
+                        showClose: true,
+                        message: '请选择6个红球'
+                    });
+                    return;
+                }
+                for (let i = 0; i < this.red0.length; i++)
+                    lottery.push(this.red0[i]);
+                lottery.push(this.blue0);
+                this.ballList.push(lottery);
+            },
+            getLotteryList() {
+                var nebulas = require("nebulas"),
+                    Account = nebulas.Account,
+                    neb = new nebulas.Neb();
+                neb.setRequest(new nebulas.HttpRequest("http://192.168.159.164:8685"));
+                var from = Account.NewAccount().getAddressString();
+
+                var value = "0";
+                var nonce = "0"
+                var gas_price = "1000000"
+                var gas_limit = "2000000"
+                var callFunction = "bettingList";
+                var callArgs = "[\""+this.pageSize+"\",\""+(this.currentPage-1)*this.pageSize +"\"]";
+                var contract = {
+                    "function": callFunction,
+                    "args": callArgs
+                }
+                var self = this;
+                neb.api.call(from, dappAddress, value, nonce, gas_price, gas_limit, contract).then(function (resp) {
+                    let result = JSON.parse(resp.result);
+                    let tempList = result.data;
+                    for (let i=0;i<tempList.length;i++)
+                    {
+                        let item = tempList[i].lottery;
+                        var itemArray = item.split("|");
+                        tempList[i].lottery = itemArray;
+                    }
+                    self.lotteryList = tempList;
+                    self.totalCount = result.totalCount;
+                }).catch(function (err) {
+                    console.log("error:" + err.message)
+                })
+            },
+            submitBlock() {
+                if (this.ballList.length==0)
+                {
+                    this.$message({
+                        type: 'error',
+                        showClose: true,
+                        message: '请先投注',
+                    });
+                    return;
+                }
+                if (this.ballList.length>5)
+                {
+                    this.$message({
+                        type: 'error',
+                        showClose: true,
+                        message: '试运行阶段最多只能投5注,请清空重新投注',
+                    });
+                    return;
+                }
+                var self = this;
+                NebPay = require("nebpay");     //https://github.com/nebulasio/nebPay
+                nebPay = new NebPay();
+                if (typeof(webExtensionWallet) === "undefined") {
+                    this.$message({
+                        type: 'error',
+                        showClose: true,
+                        message: '请先安装webExtensionWallet插件,可参照 https://medium.com/nebulasio/creating-a-nas-wallet-9d01b5fa2df6',
+                    });
+                    return;
+                }
+                var to = dappAddress;
+                var value = "0";
+                var callFunction = "betting"
+                var callArgs = "[\"" + this.calIssue() + "\",\"" + this.ballList.join("|") + "\",\"" + new Date().toLocaleString() + "\"]"
+
+                serialNumber = nebPay.call(to, value, callFunction, callArgs, {    //使用nebpay的call接口去调用合约,
+                    listener: this.cbPush        //设置listener, 处理交易返回信息
+                });
+
+                intervalQuery = setInterval(function () {
+                    self.funcIntervalQuery();
+                }, 3000);
+
+                this.$message({
+                    type: 'success',
+                    showClose: true,
+                    message: '投注成功,交易确认后可以再投注查询里面查询结果',
+                });
+                this.clearLottery();
+            },
+            funcIntervalQuery() {
+                nebPay.queryPayInfo(serialNumber)   //search transaction result from server (result upload to server by app)
+                    .then(function (resp) {
+                        console.log("tx result: " + resp)   //resp is a JSON string
+                        var respObject = JSON.parse(resp)
+                        if (respObject.code === 0) {
+                            this.$message({
+                                type: 'warning',
+                                showClose: true,
+                                message: '恭喜!投注提交成功,请前往投注查看结果',
+                            });
+                            clearInterval(intervalQuery)
+                        }
+                    })
+                    .catch(function (err) {
+                        console.log(err);
+                    });
+            },
+            clearLottery() {
+                this.ballList = [];
+            },
+            randomLottery() {
+                if (this.ballList.length>5)
+                {
+                    this.$message({
+                        type: 'error',
+                        showClose: true,
+                        message: '试运行阶段最多只能投5注,请清空重新投注',
+                    });
+                    return;
+                }
+                let lottery = this.getRandomLottery();
+                lottery.push(Math.ceil(Math.random() * 15));
+                this.ballList.push(lottery);
+            },
+            getRandomLottery() {
+                return [Math.ceil(Math.random() * 5), Math.ceil(Math.random() * 5) + 5, Math.ceil(Math.random() * 5) + 10, Math.ceil(Math.random() * 5) + 15, Math.ceil(Math.random() * 5) + 20, Math.ceil(Math.random() * 5) + 25];
+            },
+            handleClick(tab, event) {
+                console.log(tab, event);
+            },
+            calIssue(){
+                var d1 = new Date('2018/05/21 19:00:00');
+                var d2 = new Date();
+                var days = Math.floor((d2.getTime() - d1.getTime()) / (24 * 3600 * 1000));
+                var issue = 18058 + Math.floor(days / 7) * 3;
+                var days1 = days % 7;
+                if (days1 > 2) {
+                    issue = issue + 1;
+                } else if (days1 > 4) {
+                    issue = issue + 2;
+                }
+                else {
+                    issue = issue + 3;
+                }
+                return issue;
+            },
+            handleSizeChange(val) {
+                this.pageSize=val;
+                this.getLotteryList();
+            },
+            handleCurrentChange(val) {
+                this.currentPage = val;
+                this.getLotteryList();
+            },
+            cbPush(resp) {
+                console.log("response of push: " + JSON.stringify(resp))
+            }
+        },
+        mounted: function () {
+            this.getLotteryList();
         }
     })
 </script>
+
+<style>
+    .h1 {
+        font-family: "Helvetica Neue", Helvetica, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "微软雅黑", Arial, sans-serif;
+    }
+
+    .el-row {
+        margin-bottom: 1px;
+        margin-left: 50px;
+    }
+
+    .el-col {
+        border-radius: 4px;
+    }
+
+    .bg-purple-dark {
+        background: #99a9bf;
+    }
+
+    .bg-purple {
+        background: #d3dce6;
+    }
+
+    .bg-purple-light {
+        background: #e5e9f2;
+    }
+
+    .grid-content {
+        border-radius: 4px;
+        min-height: 50px;
+    }
+
+    .grid-left {
+        margin: 0 auto;
+        border-radius: 4px;
+        min-height: 50px;
+    }
+
+    .row-bg {
+        padding: 10px 0;
+        background-color: #f9fafc;
+    }
+</style>
 </html>
