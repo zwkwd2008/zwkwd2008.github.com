@@ -35,13 +35,13 @@
                                     </el-col>
                                     <el-col :span="20">
                                         <div>
-                                            <el-checkbox-group v-model="red0" size="mini" :max="6"  fill="#FC4C00">
+                                            <el-checkbox-group v-model="red0" size="mini" :max="6" fill="#FC4C00">
                                                 <el-checkbox-button v-for="item in red1"
                                                                     :label="item"></el-checkbox-button>
                                             </el-checkbox-group>
                                         </div>
                                         <div style="margin-top: 5px;">
-                                            <el-checkbox-group v-model="red0" size="mini" :max="6"  fill="#FC4C00">
+                                            <el-checkbox-group v-model="red0" size="mini" :max="6" fill="#FC4C00">
                                                 <el-checkbox-button v-for="item in red2"
                                                                     :label="item"></el-checkbox-button>
                                             </el-checkbox-group>
@@ -110,7 +110,10 @@
 
                         </el-tab-pane>
                         <el-tab-pane label="投注查询" name="second">
+
                             <el-table
+                                    v-loading="listLoading"
+                                    element-loading-text="正在加载区块数据..."
                                     :data="lotteryList"
                                     style="width: 100%;margin-left: 10px;margin-top: 10px">
                                 <el-table-column
@@ -125,12 +128,12 @@
                                 </el-table-column>
                                 <el-table-column
                                         prop="from"
-                                        min-width="200"
+                                        min-width="100"
                                         label="投注星云账户地址">
                                 </el-table-column>
                                 <el-table-column
                                         prop="lottery"
-                                        min-width="200"
+                                        min-width="150"
                                         label="投注号码">
                                     <template scope="scope">
                                         <ul>
@@ -139,8 +142,14 @@
                                                 <span style="color: blue">  +{{lotteryItem.substring(lotteryItem.lastIndexOf(",")+1)}}</span>
                                             </li>
                                         </ul>
-
-
+                                    </template>
+                                </el-table-column>
+                                <el-table-column
+                                        prop="calFee"
+                                        width="150"
+                                        label="中奖金额">
+                                    <template scope="scope">
+                                        算奖中...
                                     </template>
                                 </el-table-column>
                                 <el-table-column
@@ -149,24 +158,52 @@
                                         label="提交时间">
                                 </el-table-column>
                             </el-table>
-                            <el-pagination
-                                    @size-change="handleSizeChange"
-                                    @current-change="handleCurrentChange"
-                                    :current-page="currentPage"
-                                    :page-sizes="[5, 10, 20, 50]"
-                                    :page-size="pageSize"
-                                    style="margin-left: 20px"
-                                    layout="total, sizes, prev, pager, next, jumper"
-                                    :total="totalCount">
-                            </el-pagination>
+                            <el-row :gutter="20">
+                                <el-col :span="12">
+                                    <el-pagination
+                                            @size-change="handleSizeChange"
+                                            @current-change="handleCurrentChange"
+                                            :current-page="currentPage"
+                                            :page-sizes="[5, 10, 20, 50]"
+                                            :page-size="pageSize"
+                                            style="margin-left: 20px"
+                                            layout="total, sizes, prev, pager, next, jumper"
+                                            :total="totalCount">
+                                    </el-pagination>
+                                </el-col>
+                                <el-col :span="12">
+                                    <div style="margin-top: 3px"><el-button size="mini" @click="getLotteryList" icon="el-icon-refresh"></el-button></div>
 
+                                </el-col>
+                            </el-row>
+
+                        </el-tab-pane>
+
+                        <el-tab-pane label="玩法说明" name="fourth">
+                            <div style="margin: 10px">
+                            <h2>简介</h2>
+                            <h3>区块链彩票，颠覆性的结合，为您的"500w"打造真实透明的公平环境</h3>
+                            <h4>传统彩票面临考验</h4>
+                            传统彩票，不管是福彩、体彩中心，还是前几年的网络彩票（网易彩票，500彩票，京东彩票），都是依靠
+                            个人品牌影响力及国家法律作为约束，但是面对500w甚至上亿的奖金，这些公司难免都有可能串改投注号码，
+                            甚至跑路的危险。
+                            <h4>区块链彩票优势及未来</h4>
+                            1 和彩票中心合作，可以代替传统纸制彩票，把投注结果存储在区块链上，并且公示透明不可串改，一旦实行，将"解放"所有投注站点<br>
+                            2 提供智能合约，一旦中奖，通过合约自动以nas奖励的方式发放奖金，无需人工干越，安全可靠
+
+                            注：当前版本暂不支持真实投注。
+
+                            <h3>玩法说明</h3>
+                            <el-steps :active="4">
+                                <el-step title="步骤 1" description="切换到［彩票投注］书签"></el-step>
+                                <el-step title="步骤 2" description="选择6个红球,1个篮球,点击［添加投注］,或者［随机一注］生成"></el-step>
+                                <el-step title="步骤 3" description="点击［提交到链］,保存投注结果,注:需要安装星云钱包google插件"></el-step>
+                                <el-step title="步骤 4" description="点击［投注查询］,可以看到投注结果.注:需要等大概15s的交易确认时间,可点击列表右下角刷新按钮获取最新结果"></el-step>
+                            </el-steps>
+                            </div>
                         </el-tab-pane>
                         <el-tab-pane label="中奖播报" name="third">
                             暂未开放
-
-                        </el-tab-pane>
-                        <el-tab-pane label="规则说明" name="fourth">
-
 
                         </el-tab-pane>
                     </el-tabs>
@@ -194,7 +231,7 @@
 
 <script>
 
-    var dappAddress = "n1p6bPcEneaHopvpG4nd8mVfRdYah6hFsCZ";
+    var dappAddress = "n1gTJH4Hn59EUmjprxUWhp1eCVqcLgieANi";
     var intervalQuery;
     var serialNumber;
     var NebPay;    //https://github.com/nebulasio/nebPay
@@ -204,7 +241,7 @@
         el: '#app',
         data: function () {
             return {
-                activeName: 'first',
+                activeName: 'second',
                 red1: [01, 02, 03, 04, 05, 06, 07, 08, 09, 10, 11, 12, 13, 14, 15, 16, 17],
                 red2: [18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33],
                 blue1: [01, 02, 03, 04, 05, 06, 07, 08, 09, 10, 11, 12, 13, 14, 15, 16],
@@ -212,16 +249,16 @@
                 red0: this.getRandomLottery(),
                 ballList: [],
                 lotteryList: [],
-                currentIssue:this.calIssue(),
-                currentPage:1,
-                totalCount:0,
-                pageSize:5
+                currentIssue: this.calIssue(),
+                currentPage: 1,
+                totalCount: 0,
+                pageSize: 5,
+                listLoading:true
             };
         },
         methods: {
             addLottery() {
-                if (this.ballList.length>5)
-                {
+                if (this.ballList.length >= 5) {
                     this.$message({
                         type: 'error',
                         showClose: true,
@@ -230,8 +267,7 @@
                     return;
                 }
                 let lottery = [];
-                if(this.red0.length!=6)
-                {
+                if (this.red0.length != 6) {
                     this.$message({
                         type: 'warning',
                         showClose: true,
@@ -248,15 +284,15 @@
                 var nebulas = require("nebulas"),
                     Account = nebulas.Account,
                     neb = new nebulas.Neb();
-                neb.setRequest(new nebulas.HttpRequest("http://192.168.159.164:8685"));
+                neb.setRequest(new nebulas.HttpRequest("https://mainnet.nebulas.io"));
                 var from = Account.NewAccount().getAddressString();
 
                 var value = "0";
                 var nonce = "0"
                 var gas_price = "1000000"
-                var gas_limit = "2000000"
+                var gas_limit = "200000"
                 var callFunction = "bettingList";
-                var callArgs = "[\""+this.pageSize+"\",\""+(this.currentPage-1)*this.pageSize +"\"]";
+                var callArgs = "[\"" + this.pageSize + "\",\"" + ((this.currentPage - 1) * this.pageSize+1) + "\"]";
                 var contract = {
                     "function": callFunction,
                     "args": callArgs
@@ -265,21 +301,21 @@
                 neb.api.call(from, dappAddress, value, nonce, gas_price, gas_limit, contract).then(function (resp) {
                     let result = JSON.parse(resp.result);
                     let tempList = result.data;
-                    for (let i=0;i<tempList.length;i++)
-                    {
+                    for (let i = 0; i < tempList.length; i++) {
                         let item = tempList[i].lottery;
                         var itemArray = item.split("|");
                         tempList[i].lottery = itemArray;
                     }
                     self.lotteryList = tempList;
                     self.totalCount = result.totalCount;
+                    self.listLoading=false;
                 }).catch(function (err) {
                     console.log("error:" + err.message)
+                    self.listLoading=false;
                 })
             },
             submitBlock() {
-                if (this.ballList.length==0)
-                {
+                if (this.ballList.length == 0) {
                     this.$message({
                         type: 'error',
                         showClose: true,
@@ -287,8 +323,7 @@
                     });
                     return;
                 }
-                if (this.ballList.length>5)
-                {
+                if (this.ballList.length > 5) {
                     this.$message({
                         type: 'error',
                         showClose: true,
@@ -349,8 +384,7 @@
                 this.ballList = [];
             },
             randomLottery() {
-                if (this.ballList.length>5)
-                {
+                if (this.ballList.length >= 5) {
                     this.$message({
                         type: 'error',
                         showClose: true,
@@ -368,7 +402,7 @@
             handleClick(tab, event) {
                 console.log(tab, event);
             },
-            calIssue(){
+            calIssue() {
                 var d1 = new Date('2018/05/21 19:00:00');
                 var d2 = new Date();
                 var days = Math.floor((d2.getTime() - d1.getTime()) / (24 * 3600 * 1000));
@@ -385,7 +419,7 @@
                 return issue;
             },
             handleSizeChange(val) {
-                this.pageSize=val;
+                this.pageSize = val;
                 this.getLotteryList();
             },
             handleCurrentChange(val) {

@@ -68,16 +68,17 @@ BlockLottery.prototype = {
         if (offset > this.size) {
             throw new Error("offset is not valid");
         }
-        var number = offset + limit;
-        if (number > this.size) {
-            number = this.size;
+        var number = this.size-offset - limit;
+        var start = this.size-offset;
+        if (number < 0) {
+            number = -1;
         }
         var result = {
             data:[],
             totalCount:this.size
         };
         var rData = [];
-        for (var i = offset; i < number; i++) {
+        for (var i = start; i > number; i--) {
             var key = this.arrayMap.get(i);
             var object = this.dataMap.get(key);
             rData.push(object);
