@@ -408,13 +408,10 @@
                 var days = Math.floor((d2.getTime() - d1.getTime()) / (24 * 3600 * 1000));
                 var issue = 18058 + Math.floor(days / 7) * 3;
                 var days1 = days % 7;
-                if (days1 > 2) {
-                    issue = issue + 1;
-                } else if (days1 > 4) {
+                if (days1 >= 4) {
                     issue = issue + 2;
-                }
-                else {
-                    issue = issue + 3;
+                } else if (days1 >= 2) {
+                    issue = issue + 1;
                 }
                 return issue;
             },
