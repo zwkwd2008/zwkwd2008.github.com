@@ -172,7 +172,10 @@
                                     </el-pagination>
                                 </el-col>
                                 <el-col :span="12">
-                                    <div style="margin-top: 3px"><el-button size="mini" @click="getLotteryList" icon="el-icon-refresh"></el-button></div>
+                                    <div style="margin-top: 3px">
+                                        <el-button size="mini" @click="getLotteryList"
+                                                   icon="el-icon-refresh"></el-button>
+                                    </div>
 
                                 </el-col>
                             </el-row>
@@ -181,25 +184,28 @@
 
                         <el-tab-pane label="玩法说明" name="fourth">
                             <div style="margin: 10px">
-                            <h2>简介</h2>
-                            <h3>区块链彩票，颠覆性的结合，为您的"500w"打造真实透明的公平环境</h3>
-                            <h4>传统彩票面临考验</h4>
-                            传统彩票，不管是福彩、体彩中心，还是前几年的网络彩票（网易彩票，500彩票，京东彩票），都是依靠
-                            个人品牌影响力及国家法律作为约束，但是面对500w甚至上亿的奖金，这些公司难免都有可能串改投注号码，
-                            甚至跑路的危险。
-                            <h4>区块链彩票优势及未来</h4>
-                            1 和彩票中心合作，可以代替传统纸制彩票，把投注结果存储在区块链上，并且公示透明不可串改，一旦实行，将"解放"所有投注站点<br>
-                            2 提供智能合约，一旦中奖，通过合约自动以nas奖励的方式发放奖金，无需人工干预，安全可靠
+                                <h2>简介</h2>
+                                <h3>区块链彩票，颠覆性的结合，为您的"500w"打造真实透明的公平环境</h3>
+                                <h4>传统彩票面临考验</h4>
+                                传统彩票，不管是福彩、体彩中心，还是前几年的网络彩票（网易彩票，500彩票，京东彩票），都是依靠
+                                个人品牌影响力及国家法律作为约束，但是面对500w甚至上亿的奖金，这些公司难免都有可能串改投注号码，
+                                甚至跑路的危险。
+                                <h4>区块链彩票优势及未来</h4>
+                                1 和彩票中心合作，可以代替传统纸制彩票，把投注结果存储在区块链上，并且公示透明不可串改，一旦实行，将"解放"所有投注站点<br>
+                                2 提供智能合约，一旦中奖，通过合约自动以nas奖励的方式发放奖金，无需人工干预，安全可靠
+                                <br><br><br>
+                                <span style="color: red">注：当前版本暂不支持真实投注。由于要使用支付插件,请使用Chrome浏览器体验,</span>
+                                <br>
+                                插件安装地址:https://github.com/ChengOrangeJu/WebExtensionWallet
 
-                            注：当前版本暂不支持真实投注。由于要使用支付插件,请使用Chrome浏览器体验
-
-                            <h3>玩法说明</h3>
-                            <el-steps :active="4">
-                                <el-step title="步骤 1" description="切换到［彩票投注］书签"></el-step>
-                                <el-step title="步骤 2" description="选择6个红球,1个篮球,点击［添加投注］,或者［随机一注］生成"></el-step>
-                                <el-step title="步骤 3" description="点击［提交到链］,保存投注结果,注:需要安装星云钱包google插件"></el-step>
-                                <el-step title="步骤 4" description="点击［投注查询］,可以看到投注结果.注:需要等大概15s的交易确认时间,可点击列表右下角刷新按钮获取最新结果"></el-step>
-                            </el-steps>
+                                <h3>玩法说明</h3>
+                                <el-steps :active="4">
+                                    <el-step title="步骤 1" description="切换到［彩票投注］书签"></el-step>
+                                    <el-step title="步骤 2" description="选择6个红球,1个篮球,点击［添加投注］,或者［随机一注］生成"></el-step>
+                                    <el-step title="步骤 3" description="点击［提交到链］,保存投注结果,注:需要安装星云钱包google插件"></el-step>
+                                    <el-step title="步骤 4"
+                                             description="点击［投注查询］,可以看到投注结果.注:需要等大概15s的交易确认时间,可点击列表右下角刷新按钮获取最新结果"></el-step>
+                                </el-steps>
                             </div>
                         </el-tab-pane>
                         <el-tab-pane label="中奖播报" name="third">
@@ -253,7 +259,7 @@
                 currentPage: 1,
                 totalCount: 0,
                 pageSize: 5,
-                listLoading:true
+                listLoading: true
             };
         },
         methods: {
@@ -292,7 +298,7 @@
                 var gas_price = "1000000"
                 var gas_limit = "200000"
                 var callFunction = "bettingList";
-                var callArgs = "[\"" + this.pageSize + "\",\"" + ((this.currentPage - 1) * this.pageSize+1) + "\"]";
+                var callArgs = "[\"" + this.pageSize + "\",\"" + ((this.currentPage - 1) * this.pageSize + 1) + "\"]";
                 var contract = {
                     "function": callFunction,
                     "args": callArgs
@@ -308,10 +314,10 @@
                     }
                     self.lotteryList = tempList;
                     self.totalCount = result.totalCount;
-                    self.listLoading=false;
+                    self.listLoading = false;
                 }).catch(function (err) {
                     console.log("error:" + err.message)
-                    self.listLoading=false;
+                    self.listLoading = false;
                 })
             },
             submitBlock() {
