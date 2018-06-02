@@ -203,7 +203,7 @@
 
 <script>
 
-    var dappAddress = "n1iRQV6pAmrtRGGVkgoN7UXmAirszcSz2jC";
+    var dappAddress = "n1grbZT5c4dupCtA8CgBBDQPtquBUBukh9i";
     var intervalQuery;
     var serialNumber;
     var NebPay;    //https://github.com/nebulasio/nebPay
@@ -234,7 +234,7 @@
                 var nebulas = require("nebulas"),
                     Account = nebulas.Account,
                     neb = new nebulas.Neb();
-                neb.setRequest(new nebulas.HttpRequest("https://testnet.nebulas.io"));
+                neb.setRequest(new nebulas.HttpRequest("https://mainnet.nebulas.io"));
                 var from = Account.NewAccount().getAddressString();
 
                 if ((this.searchParam.fromCity!="" && this.searchParam.toCity=="")  || (this.searchParam.fromCity=="" && this.searchParam.toCity!=""))
