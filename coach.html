@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <!-- import CSS -->
+    <link rel="stylesheet" href="css/theme-chalk.index.css">
+</head>
+<!-- import Vue before Element -->
+<script src="lib/vue.js"></script>
+<!-- import JavaScript -->
+<script src="lib/element-ui.2.3.9.index.js"></script>
+<script src=lib/nebPay.js></script>
+<script src=lib/nebulas.js></script>
+<div id="app">
+    <el-row >
+        <el-col :span="24">
+            <div class="top-box">
+                <div style="margin-left: 50px">
+                    <h1>乡村大巴车</h1>
+                    <div style="margin-left: 220px">
+                        <h4>随时把握回乡的幸福时刻~</h4>
+                    </div>
+                </div>
+            </div>
+        </el-col>
+    </el-row>
+    <el-row>
+        <el-col :span="24"><div style="margin-top: 120px;margin-left: 50px;margin-right: 50px">
+            <template>
+                <el-tabs v-model="activeName" @tab-click="handleClick">
+                    <el-tab-pane label="班次查询" name="first">
+                        <el-form :inline="true">
+                            <el-form-item size="small" label="出发城市">
+                                <el-input size="small" v-model="searchParam.fromCity" placeholder="信阳"></el-input>
+                            </el-form-item>
+                            <el-form-item size="small"  label="到达城市">
+                                <el-input size="small" v-model="searchParam.toCity" placeholder="李家寨"></el-input>
+                            </el-form-item>
+                            <el-form-item label="发布人星云账号">
+                                <el-input size="small" v-model="searchParam.user" placeholder="n1eu6yJuFpY6Jwr8WFyynfqsRM6LCagsRWg"></el-input>
+                            </el-form-item>
+                            <el-form-item>
+                                <el-button type="info" size="small" @click="getCoachList" plain >查询</el-button>
+                            </el-form-item>
+                        </el-form>
+                        <el-table
+                                v-loading="listLoading"
+                                element-loading-text="正在加载区块数据..."
+                                :data="coachList"
+                                style="width: 100%;margin-left: 10px;margin-top: 10px">
+                            <el-table-column
+                                    prop="fromCity"
+                                    label="出发城市"
+                                    width="150">
+                            </el-table-column>
+                            <el-table-column
+                                    prop="toCity"
+                                    label="到达城市"
+                                    width="150">
+                            </el-table-column>
+                            <el-table-column
+                                    prop="fromStation"
+                                    min-width="150"
+                                    label="出发站点">
+                            </el-table-column>
+                            <el-table-column
+                                    prop="toStation"
+                                    min-width="150"
+                                    label="到达站点">
+                            </el-table-column>
+                            <el-table-column
+                                    prop="fromTime"
+                                    width="120"
+                                    label="出发时间">
+                            </el-table-column>
+                            <el-table-column
+                                    min-width="300"
+                                    label="车辆信息">
+                                <template scope="scope">
+                                    车型: {{scope.row.busType}}<br>
+                                    司机昵称: {{scope.row.driverName}}<br>
+                                    联系方式: {{scope.row.driverMobile}}<br>
+                                    发布人: {{scope.row.from}}<br>
+                                </template>
+                            </el-table-column>
+
+                            <el-table-column
+                                    prop="dateStr"
+                                    width="200"
+                                    label="提交时间">
+                            </el-table-column>
+                        </el-table>
+                        <el-row :gutter="20">
+                            <el-col :span="12">
+                                <el-pagination
+                                        @size-change="handleSizeChange"
+                                        @current-change="handleCurrentChange"
+                                        :current-page="currentPage"
+                                        :page-sizes="[5, 10, 20, 50]"
+                                        :page-size="pageSize"
+                                        style="margin-left: 20px"
+                                        layout="total, sizes, prev, pager, next, jumper"
+                                        :total="totalCount">
+                                </el-pagination>
+                            </el-col>
+                        </el-row>
+
+                    </el-tab-pane>
+                    <el-tab-pane label="发布班次" name="second">
+                        <el-form :inline="true">
+                            <el-form-item label="出发城市">
+                                <el-input v-model="coach.fromCity" style="width: 300px" placeholder="出发乡镇 如: 李家寨"></el-input>
+                            </el-form-item>
+                            <el-form-item label="到达城市">
+                                <el-input v-model="coach.toCity" style="width: 300px" placeholder="出发乡镇 如: 李家寨"></el-input>
+                            </el-form-item>
+                        </el-form>
+                        <el-form :inline="true"  class="demo-form-inline">
+                            <el-form-item label="出发站点">
+                                <el-input v-model="coach.fromStation" style="width: 300px" placeholder="具体发车点 如:漯河火车站广场"></el-input>
+                            </el-form-item>
+                            <el-form-item label="到达站点">
+                                <el-input v-model="coach.toStation" style="width: 300px" placeholder="下车站点 如:沿途任意地点"></el-input>
+                            </el-form-item>
+                        </el-form>
+                        <el-form :inline="true"  class="demo-form-inline">
+                                <el-form-item label="车型">
+                                    <el-radio-group v-model="coach.busType">
+                                        <el-radio  label="7座面包车"></el-radio>
+                                        <el-radio  label="21座小巴车"></el-radio>
+                                        <el-radio  label="33座中巴车"></el-radio>
+                                    </el-radio-group>
+                                </el-form-item>
+                        </el-form>
+
+                        <el-form :inline="true"  class="demo-form-inline">
+                            <el-form-item label="发车时间">
+                                <el-time-select
+                                        v-model="coach.fromTime"
+                                        :picker-options="{
+                                            start: '05:00',
+                                            step: '00:10',
+                                            end: '20:30'
+                                           }"
+                                        placeholder="选择时间">
+                                </el-time-select>
+                            </el-form-item>
+                        </el-form>
+
+                            <el-form :inline="true"  class="demo-form-inline">
+                            <el-form-item label="联系方式">
+                                <el-input v-model="coach.driverMobile" placeholder="如 :13200000001"></el-input>
+                            </el-form-item>
+                            <el-form-item label="昵称">
+                                <el-input  v-model="coach.driverName" placeholder="张师傅"></el-input>
+                            </el-form-item>
+                            <el-form-item label="车牌号">
+                                <el-input v-model="coach.plateNumber" placeholder="鄂A54223"></el-input>
+                            </el-form-item>
+                        </el-form>
+                        <el-form :inline="true"  class="demo-form-inline">
+                            <el-form-item >
+                                <el-button type="info" @click="submitBlock">发布班次</el-button>
+                            </el-form-item>
+                        </el-form>
+                    </el-tab-pane>
+                    <el-tab-pane label="行程简介" name="third">
+                        <div style="margin: 10px">
+                            <h3>随时把握回乡幸福时刻</h3>
+                            <h4>乡村大巴现状</h4>
+                            1 发车时间不固定,可能一月份末班车是15点,二月份就是13点,让在外游子下了家乡的火车缺错过最后一班回家的班车<br>
+                            2 发班次数不固定,农忙季一天发5班,农闲就一天2班
+                            3 形式线路固定,需要电话跟司机确认,而对于在外务工人员,可能一年也回不了一次家,谁能记得司机电话呢
+                            <h4>本站解决:</h4>
+                            1 提供班次详细信息,让你能随时把握时刻信息及司机联系信息<br>
+                            2 支持 出发城市 到达城市 检索 ,支持通过发布账号检索<br>
+                            3 随时发布班次信息,造福老乡同胞<br>
+                            4 二期会加入评价系统,发布班次可获取一定nas奖励<br>
+                            <br><br><br>
+                            <span style="color: red">注：由于发布班次需要支付少量旷工费,请先安装星云chrome支付插件,查询班次完全免费</span>
+                            <br>
+                            <span style="color: red">发布班次成功后,需要等待15s,交易确认后才能查询到发布班次</span>
+                            <br>
+                            插件安装地址:https://github.com/ChengOrangeJu/WebExtensionWallet
+                        </div>
+                    </el-tab-pane>
+
+                </el-tabs>
+            </template>
+            </template>
+        </div>
+        </el-col>
+    </el-row>
+
+
+</div>
+
+<script>
+
+    var dappAddress = "n1iRQV6pAmrtRGGVkgoN7UXmAirszcSz2jC";
+    var intervalQuery;
+    var serialNumber;
+    var NebPay;    //https://github.com/nebulasio/nebPay
+    var nebPay;
+
+    new Vue({
+        el: '#app',
+        data: function () {
+            return {
+                activeName: 'first',
+                coachList: [],
+                currentPage: 1,
+                coach:{
+                    busType:'21座小巴车'
+                },
+                searchParam:{
+                    fromCity:"",
+                    toCity:"",
+                    user:""
+                },
+                totalCount: 0,
+                pageSize: 5,
+                listLoading: true
+            };
+        },
+        methods: {
+            getCoachList() {
+                var nebulas = require("nebulas"),
+                    Account = nebulas.Account,
+                    neb = new nebulas.Neb();
+                neb.setRequest(new nebulas.HttpRequest("https://testnet.nebulas.io"));
+                var from = Account.NewAccount().getAddressString();
+
+                if ((this.searchParam.fromCity!="" && this.searchParam.toCity=="")  || (this.searchParam.fromCity=="" && this.searchParam.toCity!=""))
+                {
+                    this.$message({
+                        type: 'error',
+                        showClose: true,
+                        message: '根据线路搜索,必须同时输入出发城市和到达城市'
+                    });
+                    return;
+                }
+                this.listLoading = true;
+                var value = "0";
+                var nonce = "0"
+                var gas_price = "1000000"
+                var gas_limit = "200000"
+                var callFunction = "list";
+                var callArgs = [this.pageSize,((this.currentPage - 1) * this.pageSize + 1),this.searchParam.fromCity,this.searchParam.toCity,this.searchParam.user];
+                var contract = {
+                    "function": callFunction,
+                    "args": JSON.stringify(callArgs)
+                }
+                var self = this;
+                neb.api.call(from, dappAddress, value, nonce, gas_price, gas_limit, contract).then(function (resp) {
+                    let result = JSON.parse(resp.result);
+                    self.coachList = result.data;;
+                    self.totalCount = result.totalCount;
+                    self.listLoading = false;
+                }).catch(function (err) {
+                    console.log("error:" + err.message)
+                    self.listLoading = false;
+                })
+            },
+            submitBlock() {
+                var coach = this.coach;
+                var self = this;
+                NebPay = require("nebpay");     //https://github.com/nebulasio/nebPay
+                nebPay = new NebPay();
+                if (typeof(webExtensionWallet) === "undefined") {
+                    this.$message({
+                        type: 'error',
+                        showClose: true,
+                        message: '请先安装webExtensionWallet插件'
+                    });
+                    return;
+                }
+                var args = [coach.fromCity,coach.toCity,coach.fromStation,coach.toStation,coach.fromTime,coach.plateNumber,coach.driverMobile,coach.driverName,coach.busType,new Date().toLocaleString()];
+                var to = dappAddress;
+                var value = "0";
+                var callFunction = "addCoach"
+                var callArgs = JSON.stringify(args);
+                serialNumber = nebPay.call(to, value, callFunction, callArgs, {    //使用nebpay的call接口去调用合约,
+                    listener: this.cbPush        //设置listener, 处理交易返回信息
+                });
+
+                intervalQuery = setInterval(function () {
+                    self.funcIntervalQuery();
+                }, 3000);
+
+                this.$message({
+                    type: 'success',
+                    showClose: true,
+                    message: '保存成功',
+                });
+                this.clearLottery();
+            },
+            funcIntervalQuery() {
+                nebPay.queryPayInfo(serialNumber)   //search transaction result from server (result upload to server by app)
+                    .then(function (resp) {
+                        console.log("tx result: " + resp)   //resp is a JSON string
+                        var respObject = JSON.parse(resp)
+                        if (respObject.code === 0) {
+                            this.$message({
+                                type: 'warning',
+                                showClose: true,
+                                message: '保存成功'
+                            });
+                            clearInterval(intervalQuery)
+                        }
+                    })
+                    .catch(function (err) {
+                        console.log(err);
+                    });
+            },
+            handleClick(tab, event) {
+                console.log(tab, event);
+            },
+            calIssue() {
+                var d1 = new Date('2018/05/27 19:00:00');
+                var d2 = new Date();
+                var days = Math.floor((d2.getTime() - d1.getTime()) / (24 * 3600 * 1000));
+                var issue = 18061 + Math.floor(days / 7) * 3;
+                var days1 = days % 7;
+                if (days1 >= 4) {
+                    issue = issue + 2;
+                } else if (days1 >= 2) {
+                    issue = issue + 1;
+                }
+                return issue;
+            },
+            handleSizeChange(val) {
+                this.pageSize = val;
+                this.getCoachList();
+            },
+            handleCurrentChange(val) {
+                this.currentPage = val;
+                this.getCoachList();
+            },
+            cbPush(resp) {
+                console.log("response of push: " + JSON.stringify(resp))
+            }
+        },
+        mounted: function () {
+            this.getCoachList();
+        }
+    })
+</script>
+
+<style>
+    .h1 {
+        font-family: "Helvetica Neue", Helvetica, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "微软雅黑", Arial, sans-serif;
+    }
+
+    .top-box{
+        background:url('img/car.jpg')no-repeat;
+        width:100%;
+        height:120px;
+        background-size:100% 100%;
+        position:absolute;
+    }
+</style>
+</html>
