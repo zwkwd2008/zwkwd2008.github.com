@@ -42,6 +42,9 @@
                             <el-form-item>
                                 <el-button type="info" size="small" @click="getCoachList" plain >查询</el-button>
                             </el-form-item>
+                            <el-form-item>
+                                <el-button type="info" size="small" @click="pushCoach" plain >发布班次</el-button>
+                            </el-form-item>
                         </el-form>
                         <el-table
                                 v-loading="listLoading"
@@ -162,6 +165,9 @@
                             <el-form-item >
                                 <el-button type="info" @click="submitBlock">发布班次</el-button>
                             </el-form-item>
+                            <el-form-item >
+                                <el-button  @click="cancelPush">取消</el-button>
+                            </el-form-item>
                         </el-form>
                     </el-tab-pane>
                     <el-tab-pane label="行程简介" name="third">
@@ -275,6 +281,15 @@
                     });
                     return;
                 }
+                if (coach.fromCity=="" || coach.toCity=="" || coach.fromStation=="" || coach.toStation=="" || coach.fromTime=="" || coach.driverMobile=="" || coach.fromCity==null || coach.toCity==null || coach.fromStation==null || coach.toStation==null || coach.fromTime==null || coach.driverMobile==null)
+                {
+                    self.$message({
+                        type: 'error',
+                        showClose: true,
+                        message: '出发城市,出发站点,到达城市,到达站点,出发时间,联系方式不能为空'
+                    });
+                    return;
+                }
                 var args = [coach.fromCity,coach.toCity,coach.fromStation,coach.toStation,coach.fromTime,coach.plateNumber,coach.driverMobile,coach.driverName,coach.busType,new Date().toLocaleString()];
                 var to = dappAddress;
                 var value = "0";
@@ -287,25 +302,40 @@
                 intervalQuery = setInterval(function () {
                     self.funcIntervalQuery();
                 }, 3000);
-
-                this.$message({
-                    type: 'success',
-                    showClose: true,
-                    message: '保存成功',
-                });
-                this.clearLottery();
+            },
+            pushCoach()
+            {
+                this.activeName='second';
+            },
+            cancelPush()
+            {
+                this.activeName='first';
             },
             funcIntervalQuery() {
+                var self = this;
                 nebPay.queryPayInfo(serialNumber)   //search transaction result from server (result upload to server by app)
                     .then(function (resp) {
                         console.log("tx result: " + resp)   //resp is a JSON string
                         var respObject = JSON.parse(resp)
-                        if (respObject.code === 0) {
-                            this.$message({
-                                type: 'warning',
-                                showClose: true,
-                                message: '保存成功'
-                            });
+                        if (respObject.code === 0 && respObject.data.status!=2) {
+                            if (respObject.data.status==1)
+                            {
+                                self.$message({
+                                    type: 'success',
+                                    showClose: true,
+                                    message: '交易确认成功'
+                                });
+                                self.coach={busType:'21座小巴车'};
+                                self.activeName='first';
+                                self.getCoachList();
+                            }else
+                            {
+                                self.$message({
+                                    type: 'error',
+                                    showClose: true,
+                                    message: '提交失败,原因:'+ respObject.data.execute_error
+                                });
+                            }
                             clearInterval(intervalQuery)
                         }
                     })
