@@ -109,7 +109,7 @@
                         </el-row>
 
                     </el-tab-pane>
-                    <el-tab-pane label="发布班次" name="second">
+                    <el-tab-pane label="发布班次" name="second" v-loading="true">
                         <el-form :inline="true">
                             <el-form-item label="出发城市">
                                 <el-input v-model="coach.fromCity" style="width: 300px" placeholder="出发乡镇 如: 李家寨"></el-input>
@@ -163,7 +163,8 @@
                         </el-form>
                         <el-form :inline="true"  class="demo-form-inline">
                             <el-form-item >
-                                <el-button type="info" @click="submitBlock">发布班次</el-button>
+                                <el-button v-if="!pushStatus" type="info" @click="submitBlock">发布班次</el-button>
+                                <el-button v-if="pushStatus" type="primary" :loading="true">交易确认中,请耐心等待结果..</el-button>
                             </el-form-item>
                             <el-form-item >
                                 <el-button  @click="cancelPush">取消</el-button>
@@ -207,7 +208,11 @@
     var intervalQuery;
     var serialNumber;
     var NebPay;    //https://github.com/nebulasio/nebPay
-    var nebPay;
+
+    var nebulas = require("nebulas"),
+        Account = nebulas.Account,
+        neb = new nebulas.Neb();
+    neb.setRequest(new nebulas.HttpRequest("https://mainnet.nebulas.io"));
 
     new Vue({
         el: '#app',
@@ -216,6 +221,7 @@
                 activeName: 'first',
                 coachList: [],
                 currentPage: 1,
+                pushStatus:false,
                 coach:{
                     busType:'21座小巴车'
                 },
@@ -231,10 +237,6 @@
         },
         methods: {
             getCoachList() {
-                var nebulas = require("nebulas"),
-                    Account = nebulas.Account,
-                    neb = new nebulas.Neb();
-                neb.setRequest(new nebulas.HttpRequest("https://mainnet.nebulas.io"));
                 var from = Account.NewAccount().getAddressString();
 
                 if ((this.searchParam.fromCity!="" && this.searchParam.toCity=="")  || (this.searchParam.fromCity=="" && this.searchParam.toCity!=""))
@@ -298,10 +300,7 @@
                 serialNumber = nebPay.call(to, value, callFunction, callArgs, {    //使用nebpay的call接口去调用合约,
                     listener: this.cbPush        //设置listener, 处理交易返回信息
                 });
-
-                intervalQuery = setInterval(function () {
-                    self.funcIntervalQuery();
-                }, 3000);
+                self.pushStatus = true;
             },
             pushCoach()
             {
@@ -311,37 +310,51 @@
             {
                 this.activeName='first';
             },
-            funcIntervalQuery() {
+            funcIntervalQuery(txhash) {
                 var self = this;
-                nebPay.queryPayInfo(serialNumber)   //search transaction result from server (result upload to server by app)
-                    .then(function (resp) {
-                        console.log("tx result: " + resp)   //resp is a JSON string
-                        var respObject = JSON.parse(resp)
-                        if (respObject.code === 0 && respObject.data.status!=2) {
-                            if (respObject.data.status==1)
-                            {
-                                self.$message({
-                                    type: 'success',
-                                    showClose: true,
-                                    message: '交易确认成功'
-                                });
-                                self.coach={busType:'21座小巴车'};
-                                self.activeName='first';
-                                self.getCoachList();
-                            }else
-                            {
-                                self.$message({
-                                    type: 'error',
-                                    showClose: true,
-                                    message: '提交失败,原因:'+ respObject.data.execute_error
-                                });
-                            }
-                            clearInterval(intervalQuery)
-                        }
-                    })
-                    .catch(function (err) {
+                this.receiptTransaction(txhash).then(function(resp){
+                    var respObject = resp;
+                    console.log(JSON.stringify(resp));
+                    if (respObject.status == 1){
+                        clearInterval(self.intervalQuery);
+                        self.$message({
+                            type: 'success',
+                            showClose: true,
+                            message: '交易确认成功'
+                        });
+                        self.coach={busType:'21座小巴车'};
+                        self.activeName='first';
+                        self.pushStatus = false;
+                        self.getCoachList();
+                    } else if (respObject.status == 0) {
+                        clearInterval(self.intervalQuery);
+                        self.$message({
+                            type: 'error',
+                            showClose: true,
+                            message: '提交失败,请重试.hash='+txhash
+                        });
+                        self.pushStatus = false;
+                    }
+                }).catch(function(err){
+                    clearInterval(self.intervalQuery);
+                    self.pushStatus = false;
+                    self.$message({
+                        type: 'error',
+                        showClose: true,
+                        message: '提交失败,请重试'+err+' ;hash='+txhash
+                    });
+                })
+            },
+            // 查询交易结果
+            receiptTransaction(txhash) {
+                var promise = new Promise(function(resolve, reject){
+                    neb.api.getTransactionReceipt(txhash).then(function (resp) {
+                        resolve(resp);
+                    }).catch(function(err) {
                         console.log(err);
                     });
+                });
+                return promise
             },
             handleClick(tab, event) {
                 console.log(tab, event);
@@ -355,6 +368,10 @@
                 this.getCoachList();
             },
             cbPush(resp) {
+                var self = this;
+                self.intervalQuery = setInterval(function () {
+                    self.funcIntervalQuery(resp.txhash);
+                }, 3000);
                 console.log("response of push: " + JSON.stringify(resp))
             }
         },
