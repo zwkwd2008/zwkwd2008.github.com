@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <!-- import CSS -->
+    <link rel="stylesheet" href="css/theme-chalk.index.css">
+</head>
+<!-- import Vue before Element -->
+<script src="lib/vue.js"></script>
+<!-- import JavaScript -->
+<script src="lib/element-ui.2.3.9.index.js"></script>
+<script src=lib/nebPay.js></script>
+<script src=lib/nebulas.js></script>
+<body class="body-css">
+<div id="app">
+      <el-row :gutter="20">
+        <el-col :span="1"><div class="grid-content"></div></el-col>
+        <el-col :span="2"><div class="grid-content right-button-bg">房号:1</div></el-col>
+        <el-col :span="13"><div class="grid-content"></div></el-col>
+        <el-col :span="2"><div class="grid-content"> <el-button type="text" @click="toCurrentSpace" class="right-button-bg">当前牌局</el-button></div></el-col>
+        <el-col :span="2"><div class="grid-content "><el-button type="text" @click="toHistorySpace" class="right-button-bg">历史牌局</el-button></div></el-col>
+        <el-col :span="2"><div class="grid-content "><el-button type="text" @click="ruleDialogVisible = true" class="right-button-bg">规则</el-button></div></el-col>
+        <el-col :span="2"><div class="grid-content "></div></el-col>
+    </el-row>
+
+    <el-row v-if="deskLine1" :gutter="10" >
+        <el-col :span="3" v-for="(o, index) in 5" :key="o" :offset="1" style="margin-bottom: 10px;margin-right: 10px;margin-top: 20px;">
+            <el-card :body-style="{ padding: '0px'}">
+                <img src="img/zjh/desk.jpg" class="image">
+                <div style="padding: 14px;">
+                    <span>好吃的汉堡</span>
+                    <div class="bottom clearfix">
+                        <time class="time">{{ currentDate }}</time>
+                        <el-button type="text" class="button">操作按钮</el-button>
+                    </div>
+                </div>
+            </el-card>
+        </el-col>
+        <el-col :span="2" style="margin-left: 20px;margin-top: 200px;">
+            <img src="img/zjh/btn_up.png" class="btn-image">
+        </el-col>
+    </el-row>
+    <el-row :gutter="10" v-if="deskLine2">
+    <el-col :span="3" v-for="(o, index) in 5" :key="o" :offset="1" style="margin-bottom: 10px;margin-right: 10px;">
+        <el-card :body-style="{ padding: '0px'}">
+            <img src="img/zjh/desk.jpg" class="image">
+            <div style="padding: 14px;">
+                <span>好吃的汉堡</span>
+                <span>好吃的汉堡</span>
+                <span>好吃的汉堡</span>
+                <div class="bottom clearfix">
+                    <time class="time">{{ currentDate }}</time>
+                    <el-button type="text" class="button">操作按钮</el-button>
+                </div>
+            </div>
+        </el-card>
+    </el-col>
+    <el-col :span="2" style="margin-left: 20px;margin-top: 20px;">
+        <img src="img/zjh/btn_down.png" class="btn-image">
+    </el-col>
+</el-row>
+
+    <el-row v-if="deskLine3" :gutter="10">
+        <el-col :span="3" v-for="(o, index) in 5" :key="o" :offset="1" style="margin-bottom: 10px;margin-right: 10px;margin-top: 20px;">
+            <el-card :body-style="{ padding: '0px'}">
+                <img src="img/zjh/hide.png" class="image-n">
+                <img src="img/zjh/hide.png" class="image-n">
+                <img src="img/zjh/hide.png" class="image-n">
+                <div style="padding: 14px;">
+                    <span>好吃的汉堡</span>
+                    <div class="bottom clearfix">
+                        <time class="time">{{ currentDate }}</time>
+                        <el-button type="text" class="button">操作按钮</el-button>
+                    </div>
+                </div>
+            </el-card>
+        </el-col>
+        <el-col :span="2" style="margin-left: 20px;margin-top: 150px;">
+            <img src="img/zjh/guanbi.png" class="btn-image">
+        </el-col>
+
+    </el-row>
+    <el-row v-if="deskLine4" :gutter="10">
+        <el-col :span="3" v-for="(o, index) in 5" :key="o" :offset="1" style="margin-bottom: 10px;margin-right: 10px;margin-top: 20px;">
+            <el-card :body-style="{ padding: '0px'}">
+                <img src="img/zjh/diamond/1.png" class="image-n">
+                <img src="img/zjh/diamond/1.png" class="image-n">
+                <img src="img/zjh/diamond/1.png" class="image-n">
+                <div style="padding: 14px;">
+                    <span>好吃的汉堡</span>
+                    <div class="bottom clearfix">
+                        <time class="time">{{ currentDate }}</time>
+                        <el-button type="text" class="button">操作按钮</el-button>
+                    </div>
+                </div>
+            </el-card>
+        </el-col>
+    </el-row>
+
+    <el-dialog
+            title="提示"
+            :visible.sync="ruleDialogVisible"
+            :close-on-click-modal="false"
+            custom-class="dialog-bg"
+            width="30%"
+            center>
+        <span>需要注意的是内容是默认不居中的</span>
+        <span slot="footer" class="dialog-footer">
+    <el-button @click="centerDialogVisible = false">取 消</el-button>
+    <el-button type="primary" @click="centerDialogVisible = false">确 定</el-button>
+  </span>
+    </el-dialog>
+</div>
+</body>
+
+<script src="lib/zjh/zjh.js"></script>
+<style>
+    .h1 {
+        font-family: "Helvetica Neue", Helvetica, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "微软雅黑", Arial, sans-serif;
+    }
+    .body-css{
+        background:url(img/zjh/bj.jpg);
+        background-repeat:no-repeat ;
+        background-attachment:fixed;
+        background-size: 100% 100%;
+        font-family: "Helvetica Neue", Helvetica, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "微软雅黑", Arial, sans-serif;
+    }
+
+    .dialog-bg{
+        background:url(img/zjh/dialog_bg.png);
+        background-repeat:no-repeat ;
+        background-attachment:fixed;
+        background-size: 100% 100%;
+        font-family: "Helvetica Neue", Helvetica, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "微软雅黑", Arial, sans-serif;
+    }
+
+    .loading-bg{
+        background:url(img/zjh/loading.png);
+        background-repeat:no-repeat ;
+        background-attachment:fixed;
+        background-size: 100% 100%;
+        text-align:center;
+        font-size: 40px;
+        color:#FFF0F5;
+        font-family: "Helvetica Neue", Helvetica, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "微软雅黑", Arial, sans-serif;
+    }
+
+    .el-row {
+        margin-bottom: 10px;
+    &:last-child {
+         margin-bottom: 0;
+     }
+    }
+    .el-col {
+        border-radius: 4px;
+    }
+    .bg-purple-dark {
+
+    }
+    .dialog-rule{
+
+    }
+    .right-button-bg {
+        text-align:center;
+        line-height:50px;
+        min-height: 50px;
+        font-size: 24px;
+        color:#FFF0F5;
+    }
+    .bg-purple-light {
+        background: #e5e9f2;
+    }
+    .grid-content {
+        margin-top: 10px;
+        border-radius: 4px;
+    }
+    .row-bg {
+        padding: 10px 0;
+        background-color: #f9fafc;
+    }
+
+    .time {
+        font-size: 13px;
+        color: #999;
+    }
+
+    .bottom {
+        margin-top: 13px;
+        line-height: 12px;
+    }
+
+    .button {
+        padding: 0;
+        float: right;
+    }
+
+    .image {
+        width: 100%;
+        height: 150px;
+        display: block;
+    }
+
+    .image-n {
+        width: 30%;
+        height: 100px;
+    }
+
+    .btn-image {
+        width: 57px;
+        height: 57px;
+        display: block;
+    }
+
+    .clearfix:before,
+    .clearfix:after {
+        display: table;
+        content: "";
+    }
+
+    .clearfix:after {
+        clear: both
+    }
+</style>
+</html>
