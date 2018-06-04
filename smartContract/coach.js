@@ -68,10 +68,10 @@ BlockCoach.prototype = {
         // valid exist
         var lineIndexList = this.lineIndexMap.get(line);
         if (lineIndexList) {
-            var duplicate = this.buildDuplicateKey(coach);
+            var duplicate = this._buildDuplicateKey(coach);
             for (var itemIndex in lineIndexList) {
                 var existCoach = this.dataMap.get(itemIndex);
-                var existKey = this.buildDuplicateKey(existCoach);
+                var existKey = this._buildDuplicateKey(existCoach);
                 if (duplicate === existKey) {
                     throw new Error(" add fail : line exist ");
                 }
@@ -99,10 +99,10 @@ BlockCoach.prototype = {
             throw new Error("offset is not valid");
         }
         if (user != "") {
-            return this.userList(user, limit, offset);
+            return this._userList(user, limit, offset);
         }
         if (fromCity != "" && toCity != "") {
-            return this.lineList(fromCity, toCity, limit, offset);
+            return this._lineList(fromCity, toCity, limit, offset);
         }
         var number = this.size - offset - limit;
         var start = this.size - offset;
@@ -124,7 +124,7 @@ BlockCoach.prototype = {
         result.data = rData;
         return result;
     },
-    lineList: function (fromCity, toCity, limit, offset) {
+    _lineList: function (fromCity, toCity, limit, offset) {
         var result = {
             data: [],
             totalCount: 0
@@ -153,7 +153,7 @@ BlockCoach.prototype = {
         result.totalCount = indexSize;
         return result;
     },
-    userList: function (user, limit, offset) {
+    _userList: function (user, limit, offset) {
         var result = {
             data: [],
             totalCount: 0
@@ -181,7 +181,7 @@ BlockCoach.prototype = {
         result.totalCount = indexSize;
         return result;
     },
-    buildDuplicateKey: function (coach) {
+    _buildDuplicateKey: function (coach) {
         return coach.fromCity + coach.toCity + coach.fromStation + coach.toStation + coach.fromTime;
     }
 };
