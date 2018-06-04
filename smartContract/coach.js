@@ -56,7 +56,6 @@ BlockCoach.prototype = {
         coach.fromTime=fromTime;
         coach.driverName = driverName;
         coach.busType = busType;
-        coach
         coach.plateNumber=plateNumber;
         coach.driverMobile = driverMobile;
         coach.dateStr = dataStr;
