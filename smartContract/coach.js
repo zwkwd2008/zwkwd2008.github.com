@@ -3,6 +3,7 @@
 var CoachItem = function (text) {
     if (text) {
         var obj = JSON.parse(text);
+        this.index = obj.index;
         this.from = obj.from;
         this.fromCity = obj.fromCity;
         this.toCity = obj.toCity;
@@ -13,9 +14,11 @@ var CoachItem = function (text) {
         this.toStation = obj.toStation;
         this.dateStr = obj.dateStr;
         this.score = obj.score;
+        this.scoreCount = obj.scoreCount;
         this.busType = obj.busType;
         this.driverName = obj.driverName;
     } else {
+        this.index = 0;
         this.from = "";
         this.fromCity = "";
         this.toCity = "";
@@ -25,7 +28,8 @@ var CoachItem = function (text) {
         this.fromStation = "";
         this.toStation = "";
         this.dateStr = "";
-        this.score = "5";
+        this.scoreCount = 1;
+        this.score = 5;
         this.driverName = "";
         this.busType = "21座中巴"
     }
@@ -79,6 +83,7 @@ BlockCoach.prototype = {
         coach.plateNumber = plateNumber;
         coach.driverMobile = driverMobile;
         coach.dateStr = dataStr;
+        coach.index = this.size;
         if (coach.fromCity === "" || coach.toCity === "" || coach.fromStation === "" || coach.toStation === "" || coach.fromTime === "" || coach.driverMobile === "") {
             throw new Error("param err");
         }
@@ -117,7 +122,7 @@ BlockCoach.prototype = {
         this.userIndexMap.put(from, userIndexList);
         this.size += 1;
     },
-    score: function (itemIndex, scoreStr) {
+    submitScore: function (itemIndex, score) {
         var scoreList = this.scoreMap.get(itemIndex);
         if (!scoreList) {
             throw new Error(" score fail : line not exist ");
@@ -126,15 +131,23 @@ BlockCoach.prototype = {
         if (!existCoach) {
             throw new Error(" score fail : coachLine not exist ");
         }
-        var scoreItem = new scoreItem();
+        for (var i = 0; i < scoreList.length; i++) {
+            var scoreItem = scoreList[i];
+            if (scoreItem.scoreAddress == Blockchain.transaction.from) {
+                throw new Error(" score fail : duplicate submit score ");
+            }
+        }
+        var scoreItem = new ScoreItem();
         scoreItem.scoreAddress = Blockchain.transaction.from;
-        scoreItem.score = scoreStr;
+        scoreItem.score = score;
         scoreList.push(scoreItem);
         var sumScore = 0;
-        for (var scoreItem in scoreList) {
-            sumScore = sumScore + parseFloat(scoreItem.score);
+        for (var i = 0; i < scoreList.length; i++) {
+            var scoreItem = scoreList[i];
+            sumScore = sumScore + scoreItem.score;
         }
         existCoach.score = (sumScore / scoreList.length).toFixed(2);
+        existCoach.scoreCount = existCoach.scoreCount + 1;
         this.dataMap.put(itemIndex, existCoach);
     },
     list: function (limit, offset, fromCity, toCity, user) {

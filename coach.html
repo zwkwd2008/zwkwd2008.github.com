@@ -16,7 +16,7 @@
         <el-col :span="24">
             <div class="top-box">
                 <div style="margin-left: 50px">
-                    <h1>乡村大巴车</h1>
+                    <h1>星云乡村直通车</h1>
                     <div style="margin-left: 220px">
                         <h4>随时把握回乡的幸福时刻~</h4>
                     </div>
@@ -88,6 +88,11 @@
                                         label="服务分数">
                                 </el-table-column>
                                 <el-table-column
+                                        prop="scoreCount"
+                                        width="100"
+                                        label="评论人数">
+                                </el-table-column>
+                                <el-table-column
                                         min-width="200"
                                         label="车辆信息">
                                     <template scope="scope">
@@ -109,8 +114,8 @@
                                         label="评分">
                                     <template scope="scope">
                                         <el-rate
-                                                show-text="true"
-                                                @change="rateScore"
+                                                show-text>
+                                                @change="submitScore(scope.row.index,$event)"
                                                 :colors="['#99A9BF', '#F7BA2A', '#FF9900']">
                                         </el-rate>
                                     </template>
@@ -201,11 +206,11 @@
                         <el-tab-pane label="行程简介" name="third">
                             <div style="margin: 10px">
                                 <h3>随时把握回乡幸福时刻</h3>
-                                <h4>乡村大巴现状</h4>
+                                <h4>乡村乘车现状</h4>
                                 1 发车时间不固定,可能一月份末班车是15点,二月份就是13点,让在外游子下了家乡的火车缺错过最后一班回家的班车<br>
-                                2 发班次数不固定,农忙季一天发5班,农闲就一天2班
-                                3 形式线路固定,需要电话跟司机确认,而对于在外务工人员,可能一年也回不了一次家,谁能记得司机电话呢
-                                <h4>本站解决:</h4>
+                                2 发班次数不固定,农忙季一天发5班,农闲就一天2班<br>
+                                3 行车线路不固定,需要电话跟司机确认,而对于在外务工人员,可能一年也回不了一次家,谁能记得司机电话呢
+                                <h4>星云乡村直通车:</h4>
                                 1 提供班次详细信息,让你能随时把握时刻信息及司机联系信息<br>
                                 2 支持 出发城市 到达城市 检索 ,支持通过发布账号检索<br>
                                 3 随时发布班次信息,造福老乡同胞<br>
