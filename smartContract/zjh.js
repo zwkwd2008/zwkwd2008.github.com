@@ -1,6 +1,7 @@
 "use strict";
 
 var nasToWei = new BigNumber(10).pow(new BigNumber(18));
+var initPokerList = [["heart","hide"],["heart","hide"],["heart","hide"]];
 
 var PlayItem = function (text) {
     if (text) {
@@ -9,11 +10,15 @@ var PlayItem = function (text) {
         this.pokerList = obj.pokerList;
         this.winStatus = obj.winStatus;// 输赢状态
         this.winFee = obj.winFee; //获胜金额
+        this.nickName = obj.nickName;
+        this.createTime = obj.createTime;
     } else {
         this.userAddress = "";
         this.pokerList = [];
-        this.winStatus = false;
+        this.winStatus = 0;
         this.winFee = new BigNumber(0);
+        this.createTime = "";
+        this.nickName = "";
     }
 }
 
@@ -32,7 +37,9 @@ var DeskItem = function (text) {
         this.playCount = obj.playCount; // 开牌人数
         this.playList = obj.playList; // 玩家列表
         this.deskStatus = obj.deskStatus;
+        this.nickName = obj.nickName;
         this.slogan = obj.slogan;
+        this.createTime = obj.createTime;
     } else {
         this.index = "";
         this.from = "";
@@ -41,6 +48,8 @@ var DeskItem = function (text) {
         this.playList = [];
         this.deskStatus = true
         this.slogan = "";
+        this.nickName = "";
+        this.createTime = "";
     }
 };
 
@@ -70,7 +79,8 @@ var ZJHContract = function () {
 
     LocalContractStorage.defineMapProperties(this, {
         historyIndexMap: null, // index: Index (index => beRewardSize)
-        historyDeskKeys: null // Index: true (Index => size)
+        historyDeskKeys: null, // Index: true (Index => size)
+        nickNameMap: null
     });
 };
 
@@ -82,51 +92,66 @@ ZJHContract.prototype = {
         this.historySize = 0;
     },
     // 发起牌局 下注单位 玩家人数 口号
-    createDesk: function (deskUnits, playCount, slogan) {
+    createDesk: function (deskUnits, playCount, slogan, nickName, createTime) {
         var from = Blockchain.transaction.from;
         var value = new BigNumber(Blockchain.transaction.value);
         // 下注单位
-        deskUnits = new BigNumber(deskUnits);
+        var deskUnits = new BigNumber(deskUnits);
+        var deskUnitsWei = deskUnits.times(nasToWei)
         playCount = parseInt(playCount);
         // 创建者 支付金额和 下注单位金额一致
-        if (!value.eq(rewardTotal)) {
+        if (!value.eq(deskUnitsWei)) {
             throw new Error("Please pay " + deskUnits.div(nasToWei) + "NAS.");
         }
-
         var deskItem = new DeskItem();
         deskItem.index = this.size;
         deskItem.from = from;
         deskItem.deskUnits = deskUnits;
         deskItem.playCount = playCount;
         deskItem.slogan = slogan;
-        deskItem.playList = [from];
+        var playItem = new PlayItem();
+        playItem.userAddress = from;
+        playItem.pokerList= initPokerList;
+        playItem.winStatus = 0;
+        playItem.nickName = nickName;
+        playItem.createTime =createTime;
+
+        deskItem.playList = [playItem];
+        deskItem.nickName = nickName;
+        deskItem.createTime = createTime;
+        this.nickNameMap.set(from, nickName);
         this.allDeskMap.set(this.size, deskItem);
         this.size += 1;
     },
 
     // 参与
-    joinDesk: function (deskIndex) {
+    joinDesk: function (deskIndex,nickName,createTime) {
         var from = Blockchain.transaction.from;
         var value = new BigNumber(Blockchain.transaction.value);
         deskIndex = new BigNumber(deskIndex);
         var deskItem = this.allDeskMap.get(deskIndex);
         //交易桌号状态
         this._validDesk(deskItem);
-
-        if (!value.eq(deskItem.deskUnits)) {
-            throw new Error("Please pay " + deskItem.deskUnits.div(nasToWei) + "NAS.");
+        var deskUnits = new BigNumber(deskItem.deskUnits);
+        var deskUnitsWei = deskUnits.times(nasToWei)
+        if (!value.eq(deskUnitsWei)) {
+            throw new Error("Please pay " + deskUnits.div(nasToWei) + "NAS.");
         }
         var playItem = new PlayItem();
         playItem.userAddress = from;
+        playItem.pokerList= initPokerList;
+        playItem.winStatus = 0;
+        playItem.nickName = nickName;
+        playItem.createTime = createTime;
         deskItem.playList.push(playItem);
-        if (deskItem.playList.length == deskItem.playCount){
+        if (deskItem.playList.length == deskItem.playCount) {
             // 人数满了 发牌 结算
             var playList = deskItem.playList;
             //发牌
-            playList =  this._dealPoker(playList);
+            playList = this._dealPoker(playList);
             //开奖
             var winnerPlay = this._openPoker(playList);
-            var winFee =  deskItem.deskUnits.times(deskItem.playCount).minus(this.fee);
+            var winFee = deskUnits.times(deskItem.playCount);
             // 支付奖金
             var result = Blockchain.transfer(winnerPlay.userAddress, winFee);
             if (!result) {
@@ -140,14 +165,17 @@ ZJHContract.prototype = {
                 }
             });
             var historyIndex = this.historySize;
-            this.historyIndexMap.set(historyIndex,deskItem.index);
-            this.historyDeskKeys.set(deskItem.index,true);
-            for ( var i=0;i<playList.length;i++)
-            {
-                if (playList[i].userAddress == winnerPlay.userAddress)
-                {
+            this.historyIndexMap.set(historyIndex, deskItem.index);
+            this.historyDeskKeys.set(deskItem.index, true);
+            this.nickNameMap.set(from, nickName);
+            for (var i = 0; i < playList.length; i++) {
+                if (playList[i].userAddress == winnerPlay.userAddress) {
                     playList[i].winFee = winFee;
-                    playList[i].winStatus = true;
+                    playList[i].winStatus = 1;
+                }else
+                {
+                    playList[i].winFee = 0;
+                    playList[i].winStatus = 2;
                 }
             }
             deskItem.playList = playList;
@@ -183,6 +211,9 @@ ZJHContract.prototype = {
         return beRewardGuess;
     },
 
+    getNickName: function (fromAddress) {
+        return this.nickNameMap.get(fromAddress);
+    },
     _validDesk: function (deskItem) {
         if (!deskItem) {
             throw new Error("this desk not exist");
@@ -309,11 +340,9 @@ ZJHContract.prototype = {
     _openPoker: function (playList) {
         var winnerPlayer = playList[0];
         var winnerWeight = 0;
-        for (var i=0;i<playList.length;i++)
-        {
+        for (var i = 0; i < playList.length; i++) {
             var weight = this._calWeight(playList[i].pokerList[0], playList[i].pokerList[1], playList[i].pokerList[2]);
-            if (weight>winnerWeight)
-            {
+            if (weight > winnerWeight) {
                 winnerPlayer = playList[i];
                 winnerWeight = weight;
             }
