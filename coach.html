@@ -12,7 +12,7 @@
 <script src=lib/nebPay.js></script>
 <script src=lib/nebulas.js></script>
 <div id="app">
-    <el-row >
+    <el-row>
         <el-col :span="24">
             <div class="top-box">
                 <div style="margin-left: 50px">
@@ -25,181 +25,204 @@
         </el-col>
     </el-row>
     <el-row>
-        <el-col :span="24"><div style="margin-top: 120px;margin-left: 50px;margin-right: 50px">
-            <template>
-                <el-tabs v-model="activeName"
-                         v-loading="loading2"
-                         :element-loading-text="loading2Text"
-                         element-loading-spinner="el-icon-loading"
-                         @tab-click="handleClick">
-                    <el-tab-pane label="班次查询" name="first">
-                        <el-form :inline="true">
-                            <el-form-item size="small" label="出发城市">
-                                <el-input size="small" v-model="searchParam.fromCity" placeholder="信阳"></el-input>
-                            </el-form-item>
-                            <el-form-item size="small"  label="到达城市">
-                                <el-input size="small" v-model="searchParam.toCity" placeholder="李家寨"></el-input>
-                            </el-form-item>
-                            <el-form-item label="发布人星云账号">
-                                <el-input size="small" v-model="searchParam.user" placeholder="n1eu6yJuFpY6Jwr8WFyynfqsRM6LCagsRWg"></el-input>
-                            </el-form-item>
-                            <el-form-item>
-                                <el-button type="info" size="small" @click="getCoachList" plain >查询</el-button>
-                            </el-form-item>
-                            <el-form-item>
-                                <el-button type="info" size="small" @click="pushCoach" plain >发布班次</el-button>
-                            </el-form-item>
-                        </el-form>
-                        <el-table
-                                v-loading="listLoading"
-                                element-loading-text="正在加载区块数据..."
-                                :data="coachList"
-                                style="width: 100%;margin-left: 10px;margin-top: 10px">
-                            <el-table-column
-                                    prop="fromCity"
-                                    label="出发城市"
-                                    width="150">
-                            </el-table-column>
-                            <el-table-column
-                                    prop="toCity"
-                                    label="到达城市"
-                                    width="150">
-                            </el-table-column>
-                            <el-table-column
-                                    prop="fromStation"
-                                    min-width="150"
-                                    label="出发站点">
-                            </el-table-column>
-                            <el-table-column
-                                    prop="toStation"
-                                    min-width="150"
-                                    label="到达站点">
-                            </el-table-column>
-                            <el-table-column
-                                    prop="fromTime"
-                                    width="120"
-                                    label="出发时间">
-                            </el-table-column>
-                            <el-table-column
-                                    min-width="300"
-                                    label="车辆信息">
-                                <template scope="scope">
-                                    车型: {{scope.row.busType}}<br>
-                                    司机昵称: {{scope.row.driverName}}<br>
-                                    联系方式: {{scope.row.driverMobile}}<br>
-                                    发布人: {{scope.row.from}}<br>
-                                </template>
-                            </el-table-column>
+        <el-col :span="24">
+            <div style="margin-top: 120px;margin-left: 50px;margin-right: 50px">
+                <template>
+                    <el-tabs v-model="activeName"
+                             v-loading="loading2"
+                             :element-loading-text="loading2Text"
+                             element-loading-spinner="el-icon-loading"
+                             @tab-click="handleClick">
+                        <el-tab-pane label="班次查询" name="first">
+                            <el-form :inline="true">
+                                <el-form-item size="small" label="出发城市">
+                                    <el-input size="small" v-model="searchParam.fromCity" placeholder="信阳"></el-input>
+                                </el-form-item>
+                                <el-form-item size="small" label="到达城市">
+                                    <el-input size="small" v-model="searchParam.toCity" placeholder="李家寨"></el-input>
+                                </el-form-item>
+                                <el-form-item label="发布人星云账号">
+                                    <el-input size="small" v-model="searchParam.user"
+                                              placeholder="n1eu6yJuFpY6Jwr8WFyynfqsRM6LCagsRWg"></el-input>
+                                </el-form-item>
+                                <el-form-item>
+                                    <el-button type="info" size="small" @click="getCoachList" plain>查询</el-button>
+                                </el-form-item>
+                                <el-form-item>
+                                    <el-button type="info" size="small" @click="pushCoach" plain>发布班次</el-button>
+                                </el-form-item>
+                            </el-form>
+                            <el-table
+                                    v-loading="listLoading"
+                                    element-loading-text="正在加载区块数据..."
+                                    :data="coachList"
+                                    style="width: 100%;margin-left: 10px;margin-top: 10px">
+                                <el-table-column
+                                        prop="fromCity"
+                                        label="出发城市"
+                                        width="100">
+                                </el-table-column>
+                                <el-table-column
+                                        prop="toCity"
+                                        label="到达城市"
+                                        width="100">
+                                </el-table-column>
+                                <el-table-column
+                                        prop="fromStation"
+                                        min-width="120"
+                                        label="出发站点">
+                                </el-table-column>
+                                <el-table-column
+                                        prop="toStation"
+                                        min-width="120"
+                                        label="到达站点">
+                                </el-table-column>
+                                <el-table-column
+                                        prop="fromTime"
+                                        width="100"
+                                        label="出发时间">
+                                </el-table-column>
+                                <el-table-column
+                                        prop="score"
+                                        width="100"
+                                        label="服务分数">
+                                </el-table-column>
+                                <el-table-column
+                                        min-width="200"
+                                        label="车辆信息">
+                                    <template scope="scope">
+                                        车型: {{scope.row.busType}}<br>
+                                        司机昵称: {{scope.row.driverName}}<br>
+                                        联系方式: {{scope.row.driverMobile}}<br>
+                                        发布人: {{scope.row.from}}<br>
+                                    </template>
+                                </el-table-column>
 
-                            <el-table-column
-                                    prop="dateStr"
-                                    width="200"
-                                    label="提交时间">
-                            </el-table-column>
-                        </el-table>
-                        <el-row :gutter="20">
-                            <el-col :span="12">
-                                <el-pagination
-                                        @size-change="handleSizeChange"
-                                        @current-change="handleCurrentChange"
-                                        :current-page="currentPage"
-                                        :page-sizes="[5, 10, 20, 50]"
-                                        :page-size="pageSize"
-                                        style="margin-left: 20px"
-                                        layout="total, sizes, prev, pager, next, jumper"
-                                        :total="totalCount">
-                                </el-pagination>
-                            </el-col>
-                        </el-row>
+                                <el-table-column
+                                        prop="dateStr"
+                                        width="150"
+                                        label="提交时间">
+                                </el-table-column>
+                                <el-table-column
+                                        prop="dateStr"
+                                        width="200"
+                                        label="评分">
+                                    <template scope="scope">
+                                        <el-rate
+                                                show-text="true"
+                                                @change="rateScore"
+                                                :colors="['#99A9BF', '#F7BA2A', '#FF9900']">
+                                        </el-rate>
+                                    </template>
+                                </el-table-column>
+                            </el-table>
+                            <el-row :gutter="20">
+                                <el-col :span="12">
+                                    <el-pagination
+                                            @size-change="handleSizeChange"
+                                            @current-change="handleCurrentChange"
+                                            :current-page="currentPage"
+                                            :page-sizes="[5, 10, 20, 50]"
+                                            :page-size="pageSize"
+                                            style="margin-left: 20px"
+                                            layout="total, sizes, prev, pager, next, jumper"
+                                            :total="totalCount">
+                                    </el-pagination>
+                                </el-col>
+                            </el-row>
 
-                    </el-tab-pane>
-                    <el-tab-pane label="发布班次" name="second" v-loading="true">
-                        <el-form :inline="true"  :rules="rules" :model="coach"  ref="coach">
-                            <el-form-item label="出发城市" prop="fromCity">
-                                <el-input v-model="coach.fromCity"  style="width: 300px" placeholder="出发乡镇 如: 李家寨"></el-input>
-                            </el-form-item>
-                            <el-form-item label="到达城市" prop="toCity">
-                                <el-input v-model="coach.toCity"   style="width: 300px" placeholder="出发乡镇 如: 李家寨"></el-input>
-                            </el-form-item>
-                        </el-form>
-                        <el-form :inline="true" :rules="rules" class="demo-form-inline" :model="coach"  ref="coach">
-                            <el-form-item label="出发站点" prop="fromStation">
-                                <el-input v-model="coach.fromStation" style="width: 300px" placeholder="具体发车点 如:漯河火车站广场"></el-input>
-                            </el-form-item>
-                            <el-form-item label="到达站点" prop="toStation">
-                                <el-input v-model="coach.toStation" style="width: 300px" placeholder="下车站点 如:沿途任意地点"></el-input>
-                            </el-form-item>
-                        </el-form>
-                        <el-form :inline="true"  class="demo-form-inline" :rules="rules" :model="coach"  ref="coach">
+                        </el-tab-pane>
+                        <el-tab-pane label="发布班次" name="second" v-loading="true">
+                            <el-form :inline="true" :rules="rules" :model="coach" ref="coach">
+                                <el-form-item label="出发城市" prop="fromCity">
+                                    <el-input v-model="coach.fromCity" style="width: 300px"
+                                              placeholder="出发乡镇 如: 李家寨"></el-input>
+                                </el-form-item>
+                                <el-form-item label="到达城市" prop="toCity">
+                                    <el-input v-model="coach.toCity" style="width: 300px"
+                                              placeholder="出发乡镇 如: 李家寨"></el-input>
+                                </el-form-item>
+                            </el-form>
+                            <el-form :inline="true" :rules="rules" class="demo-form-inline" :model="coach" ref="coach">
+                                <el-form-item label="出发站点" prop="fromStation">
+                                    <el-input v-model="coach.fromStation" style="width: 300px"
+                                              placeholder="具体发车点 如:漯河火车站广场"></el-input>
+                                </el-form-item>
+                                <el-form-item label="到达站点" prop="toStation">
+                                    <el-input v-model="coach.toStation" style="width: 300px"
+                                              placeholder="下车站点 如:沿途任意地点"></el-input>
+                                </el-form-item>
+                            </el-form>
+                            <el-form :inline="true" class="demo-form-inline" :rules="rules" :model="coach" ref="coach">
                                 <el-form-item label="车型" prop="busType">
                                     <el-radio-group v-model="coach.busType">
-                                        <el-radio  label="7座面包车"></el-radio>
-                                        <el-radio  label="21座小巴车"></el-radio>
-                                        <el-radio  label="33座中巴车"></el-radio>
-                                        <el-radio  label="其他"></el-radio>
+                                        <el-radio label="7座面包车"></el-radio>
+                                        <el-radio label="21座小巴车"></el-radio>
+                                        <el-radio label="33座中巴车"></el-radio>
+                                        <el-radio label="其他"></el-radio>
                                     </el-radio-group>
                                 </el-form-item>
-                        </el-form>
+                            </el-form>
 
-                        <el-form :inline="true"  class="demo-form-inline" :rules="rules" :model="coach"  ref="coach">
-                            <el-form-item label="发车时间" prop="fromTime">
-                                <el-time-select
-                                        v-model="coach.fromTime"
-                                        :picker-options="{
+                            <el-form :inline="true" class="demo-form-inline" :rules="rules" :model="coach" ref="coach">
+                                <el-form-item label="发车时间" prop="fromTime">
+                                    <el-time-select
+                                            v-model="coach.fromTime"
+                                            :picker-options="{
                                             start: '05:00',
                                             step: '00:10',
                                             end: '20:30'
                                            }"
-                                        placeholder="选择时间">
-                                </el-time-select>
-                            </el-form-item>
-                        </el-form>
+                                            placeholder="选择时间">
+                                    </el-time-select>
+                                </el-form-item>
+                            </el-form>
 
-                            <el-form :inline="true"  class="demo-form-inline" :rules="rules" :model="coach"  ref="coach">
-                            <el-form-item label="联系方式" prop="driverMobile" >
-                                <el-input v-model="coach.driverMobile" placeholder="如 :13200000001"></el-input>
-                            </el-form-item>
-                            <el-form-item label="昵称">
-                                <el-input  v-model="coach.driverName" placeholder="张师傅"></el-input>
-                            </el-form-item>
-                            <el-form-item label="车牌号">
-                                <el-input v-model="coach.plateNumber" placeholder="鄂A54223"></el-input>
-                            </el-form-item>
-                        </el-form>
-                        <el-form :inline="true"  class="demo-form-inline">
-                            <el-form-item >
-                                <el-button  type="info" @click="submitBlock">发布班次</el-button>
-                            </el-form-item>
-                            <el-form-item >
-                                <el-button  @click="cancelPush">取消</el-button>
-                            </el-form-item>
-                        </el-form>
-                    </el-tab-pane>
-                    <el-tab-pane label="行程简介" name="third">
-                        <div style="margin: 10px">
-                            <h3>随时把握回乡幸福时刻</h3>
-                            <h4>乡村大巴现状</h4>
-                            1 发车时间不固定,可能一月份末班车是15点,二月份就是13点,让在外游子下了家乡的火车缺错过最后一班回家的班车<br>
-                            2 发班次数不固定,农忙季一天发5班,农闲就一天2班
-                            3 形式线路固定,需要电话跟司机确认,而对于在外务工人员,可能一年也回不了一次家,谁能记得司机电话呢
-                            <h4>本站解决:</h4>
-                            1 提供班次详细信息,让你能随时把握时刻信息及司机联系信息<br>
-                            2 支持 出发城市 到达城市 检索 ,支持通过发布账号检索<br>
-                            3 随时发布班次信息,造福老乡同胞<br>
-                            4 二期会加入评价系统,发布班次可获取一定nas奖励<br>
-                            <br><br><br>
-                            <span style="color: red">注：由于发布班次需要支付少量旷工费,请先安装星云chrome支付插件,查询班次完全免费</span>
-                            <br>
-                            <span style="color: red">发布班次成功后,需要等待15s,交易确认后才能查询到发布班次</span>
-                            <br>
-                            插件安装地址:https://github.com/ChengOrangeJu/WebExtensionWallet
-                        </div>
-                    </el-tab-pane>
+                            <el-form :inline="true" class="demo-form-inline" :rules="rules" :model="coach" ref="coach">
+                                <el-form-item label="联系方式" prop="driverMobile">
+                                    <el-input v-model="coach.driverMobile" placeholder="如 :13200000001"></el-input>
+                                </el-form-item>
+                                <el-form-item label="昵称">
+                                    <el-input v-model="coach.driverName" placeholder="张师傅"></el-input>
+                                </el-form-item>
+                                <el-form-item label="车牌号">
+                                    <el-input v-model="coach.plateNumber" placeholder="鄂A54223"></el-input>
+                                </el-form-item>
+                            </el-form>
+                            <el-form :inline="true" class="demo-form-inline">
+                                <el-form-item>
+                                    <el-button type="info" @click="submitBlock">发布班次</el-button>
+                                </el-form-item>
+                                <el-form-item>
+                                    <el-button @click="cancelPush">取消</el-button>
+                                </el-form-item>
+                            </el-form>
+                        </el-tab-pane>
+                        <el-tab-pane label="行程简介" name="third">
+                            <div style="margin: 10px">
+                                <h3>随时把握回乡幸福时刻</h3>
+                                <h4>乡村大巴现状</h4>
+                                1 发车时间不固定,可能一月份末班车是15点,二月份就是13点,让在外游子下了家乡的火车缺错过最后一班回家的班车<br>
+                                2 发班次数不固定,农忙季一天发5班,农闲就一天2班
+                                3 形式线路固定,需要电话跟司机确认,而对于在外务工人员,可能一年也回不了一次家,谁能记得司机电话呢
+                                <h4>本站解决:</h4>
+                                1 提供班次详细信息,让你能随时把握时刻信息及司机联系信息<br>
+                                2 支持 出发城市 到达城市 检索 ,支持通过发布账号检索<br>
+                                3 随时发布班次信息,造福老乡同胞<br>
+                                4 二期会加入评价系统,发布班次可获取一定nas奖励<br>
+                                <br><br><br>
+                                <span style="color: red">注：由于发布班次需要支付少量旷工费,请先安装星云chrome支付插件,查询班次完全免费</span>
+                                <br>
+                                <span style="color: red">发布班次成功后,需要等待15s,交易确认后才能查询到发布班次</span>
+                                <br>
+                                插件安装地址:https://github.com/ChengOrangeJu/WebExtensionWallet
+                            </div>
+                        </el-tab-pane>
 
-                </el-tabs>
-            </template>
-            </template>
-        </div>
+                    </el-tabs>
+                </template>
+                </template>
+            </div>
         </el-col>
     </el-row>
 
@@ -213,12 +236,12 @@
         font-family: "Helvetica Neue", Helvetica, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "微软雅黑", Arial, sans-serif;
     }
 
-    .top-box{
-        background:url('img/car.jpg')no-repeat;
-        width:100%;
-        height:120px;
-        background-size:100% 100%;
-        position:absolute;
+    .top-box {
+        background: url('img/car.jpg') no-repeat;
+        width: 100%;
+        height: 120px;
+        background-size: 100% 100%;
+        position: absolute;
     }
 </style>
 </html>

@@ -12,8 +12,9 @@ var CoachItem = function (text) {
         this.fromStation = obj.fromStation;
         this.toStation = obj.toStation;
         this.dateStr = obj.dateStr;
+        this.score = obj.score;
         this.busType = obj.busType;
-        this.driverName=obj.driverName;
+        this.driverName = obj.driverName;
     } else {
         this.from = "";
         this.fromCity = "";
@@ -24,8 +25,26 @@ var CoachItem = function (text) {
         this.fromStation = "";
         this.toStation = "";
         this.dateStr = "";
-        this.driverName="";
-        this.busType="21座中巴"
+        this.score = "5";
+        this.driverName = "";
+        this.busType = "21座中巴"
+    }
+};
+
+var ScoreItem = function (text) {
+    if (text) {
+        var obj = JSON.parse(text);
+        this.score = obj.score;
+        this.scoreAddress = obj.scoreAddress;
+    } else {
+        this.score = 5;
+        this.scoreAddress = "";
+    }
+};
+
+ScoreItem.prototype = {
+    toString: function () {
+        return JSON.stringify(this);
     }
 };
 
@@ -38,6 +57,7 @@ CoachItem.prototype = {
 var BlockCoach = function () {
     LocalContractStorage.defineMapProperty(this, "userIndexMap");
     LocalContractStorage.defineMapProperty(this, "lineIndexMap");
+    LocalContractStorage.defineMapProperty(this, "scoreMap");
     LocalContractStorage.defineMapProperty(this, "dataMap");
     LocalContractStorage.defineProperty(this, "size");
 };
@@ -47,16 +67,16 @@ BlockCoach.prototype = {
         this.size = 0;
     },
 
-    addCoach: function (fromCity,toCity,fromStation,toStation,fromTime,plateNumber,driverMobile,driverName,busType,dataStr) {
+    addCoach: function (fromCity, toCity, fromStation, toStation, fromTime, plateNumber, driverMobile, driverName, busType, dataStr) {
         var coach = new CoachItem();
-        coach.fromCity=fromCity;
-        coach.toCity=toCity;
-        coach.fromStation=fromStation;
-        coach.toStation=toStation;
-        coach.fromTime=fromTime;
+        coach.fromCity = fromCity;
+        coach.toCity = toCity;
+        coach.fromStation = fromStation;
+        coach.toStation = toStation;
+        coach.fromTime = fromTime;
         coach.driverName = driverName;
         coach.busType = busType;
-        coach.plateNumber=plateNumber;
+        coach.plateNumber = plateNumber;
         coach.driverMobile = driverMobile;
         coach.dateStr = dataStr;
         if (coach.fromCity === "" || coach.toCity === "" || coach.fromStation === "" || coach.toStation === "" || coach.fromTime === "" || coach.driverMobile === "") {
@@ -81,6 +101,11 @@ BlockCoach.prototype = {
         }
         var index = this.size;
         this.dataMap.put(index, coach);
+        var scoreItem = new ScoreItem();
+        scoreItem.score = 5;
+        scoreItem.scoreAddress = from;
+        var soreList = [scoreItem];
+        this.scoreMap.put(index, soreList);
         lineIndexList.push(index);
         this.lineIndexMap.put(line, lineIndexList);
         // user index
@@ -91,6 +116,26 @@ BlockCoach.prototype = {
         userIndexList.push(index);
         this.userIndexMap.put(from, userIndexList);
         this.size += 1;
+    },
+    score: function (itemIndex, scoreStr) {
+        var scoreList = this.scoreMap.get(itemIndex);
+        if (!scoreList) {
+            throw new Error(" score fail : line not exist ");
+        }
+        var existCoach = this.dataMap.get(itemIndex);
+        if (!existCoach) {
+            throw new Error(" score fail : coachLine not exist ");
+        }
+        var scoreItem = new scoreItem();
+        scoreItem.scoreAddress = Blockchain.transaction.from;
+        scoreItem.score = scoreStr;
+        scoreList.push(scoreItem);
+        var sumScore = 0;
+        for (var scoreItem in scoreList) {
+            sumScore = sumScore + parseFloat(scoreItem.score);
+        }
+        existCoach.score = (sumScore / scoreList.length).toFixed(2);
+        this.dataMap.put(itemIndex, existCoach);
     },
     list: function (limit, offset, fromCity, toCity, user) {
         limit = parseInt(limit);
@@ -116,8 +161,7 @@ BlockCoach.prototype = {
         var rData = [];
         for (var i = start; i > number; i--) {
             var object = this.dataMap.get(i);
-            if (object)
-            {
+            if (object) {
                 rData.push(object);
             }
         }
@@ -144,8 +188,7 @@ BlockCoach.prototype = {
         for (var i = start; i > number; i--) {
             var userIndex = lineIndexList[i];
             var object = this.dataMap.get(userIndex);
-            if (object)
-            {
+            if (object) {
                 rData.push(object);
             }
         }
@@ -172,8 +215,7 @@ BlockCoach.prototype = {
         for (var i = start; i > number; i--) {
             var userIndex = userIndexList[i];
             var object = this.dataMap.get(userIndex);
-            if (object)
-            {
+            if (object) {
                 rData.push(object);
             }
         }
