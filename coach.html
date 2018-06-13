@@ -114,9 +114,9 @@
                                         label="评分">
                                     <template scope="scope">
                                         <el-rate
-                                                show-text>
                                                 @change="submitScore(scope.row.index,$event)"
-                                                :colors="['#99A9BF', '#F7BA2A', '#FF9900']">
+                                                :colors="['#99A9BF', '#F7BA2A', '#FF9900']"
+                                                show-text>
                                         </el-rate>
                                     </template>
                                 </el-table-column>
@@ -212,7 +212,8 @@
                                 3 使在外游子回家的最后一站,能够选择最好的乘车服务,随时把握回乡的幸福时刻<br>
                                 4 让在老家跑车的师傅们有发布班次服务的平台,通过评分系统来不断提高自己的服务<br>
                                 <h3>使用说明</h3>
-                                1 支持 出发城市 到达城市 检索 ,支持通过发布账号检索<br>
+                                1 支持 出发城市 到达城市 检索<br>
+                                2 支持通过发布账号检索
                                 <br><br><br>
                                 <span style="color: red">注：由于发布班次需要支付少量旷工费,请先安装<a href="https://github.com/ChengOrangeJu/WebExtensionWallet" target="view_window">星云chrome支付插件</a>,查询班次完全免费</span>
                                 <br>
