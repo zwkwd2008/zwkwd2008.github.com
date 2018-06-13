@@ -16,7 +16,7 @@
         <el-col :span="24">
             <div class="top-box">
                 <div style="margin-left: 50px">
-                    <h1>星云乡村直通车</h1>
+                    <h1>区块链乡村直通车</h1>
                     <div style="margin-left: 220px">
                         <h4>随时把握回乡的幸福时刻~</h4>
                     </div>
@@ -161,6 +161,7 @@
                             <el-form :inline="true" class="demo-form-inline" :rules="rules" :model="coach" ref="coach">
                                 <el-form-item label="车型" prop="busType">
                                     <el-radio-group v-model="coach.busType">
+                                        <el-radio label="4座轿车"></el-radio>
                                         <el-radio label="7座面包车"></el-radio>
                                         <el-radio label="21座小巴车"></el-radio>
                                         <el-radio label="33座中巴车"></el-radio>
@@ -205,22 +206,18 @@
                         </el-tab-pane>
                         <el-tab-pane label="行程简介" name="third">
                             <div style="margin: 10px">
-                                <h3>随时把握回乡幸福时刻</h3>
-                                <h4>乡村乘车现状</h4>
-                                1 发车时间不固定,可能一月份末班车是15点,二月份就是13点,让在外游子下了家乡的火车缺错过最后一班回家的班车<br>
-                                2 发班次数不固定,农忙季一天发5班,农闲就一天2班<br>
-                                3 行车线路不固定,需要电话跟司机确认,而对于在外务工人员,可能一年也回不了一次家,谁能记得司机电话呢
-                                <h4>星云乡村直通车:</h4>
-                                1 提供班次详细信息,让你能随时把握时刻信息及司机联系信息<br>
-                                2 支持 出发城市 到达城市 检索 ,支持通过发布账号检索<br>
-                                3 随时发布班次信息,造福老乡同胞<br>
-                                4 二期会加入评价系统,发布班次可获取一定nas奖励<br>
+                                <h3>简介</h3>
+                                1 依托于星云链,提供班次的发布,查询功能<br>
+                                2 使用区块链技术,打造班次服务质量的评分系统,公正,公开,一人一票,不可篡改.<br>
+                                3 使在外游子回家的最后一站,能够选择最好的乘车服务,随时把握回乡的幸福时刻<br>
+                                4 让在老家跑车的师傅们有发布班次服务的平台,通过评分系统来不断提高自己的服务<br>
+                                <h3>使用说明</h3>
+                                1 支持 出发城市 到达城市 检索 ,支持通过发布账号检索<br>
                                 <br><br><br>
-                                <span style="color: red">注：由于发布班次需要支付少量旷工费,请先安装星云chrome支付插件,查询班次完全免费</span>
+                                <span style="color: red">注：由于发布班次需要支付少量旷工费,请先安装<a href="https://github.com/ChengOrangeJu/WebExtensionWallet" target="view_window">星云chrome支付插件</a>,查询班次完全免费</span>
                                 <br>
-                                <span style="color: red">发布班次成功后,需要等待15s,交易确认后才能查询到发布班次</span>
+                                <span style="color: red">发布班次成功后,请耐心等待最多15s确认时间,交易确认后会自动跳转到班次列表页面,不需要手动刷新页面</span>
                                 <br>
-                                插件安装地址:https://github.com/ChengOrangeJu/WebExtensionWallet
                             </div>
                         </el-tab-pane>
 
